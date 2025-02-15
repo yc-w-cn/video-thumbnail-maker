@@ -1,13 +1,12 @@
 import FileDropOverlay from './components/FileDropOverlay';
-import { invoke } from '@tauri-apps/api/core';
-import { Button } from './components/ui/button';
 import { useAppStore } from './store';
 import DependencyCheck from './components/DependencyCheck';
 import { Toaster } from './components/ui/toaster';
 import VideoSettings from './components/VideoSettings';
+import ProcessButton from './components/ProcessButton';
 
 export default function App() {
-  const { settings, processState, setCurrentFile } = useAppStore();
+  const { processState } = useAppStore();
 
   return (
     <>
@@ -32,28 +31,7 @@ export default function App() {
 
           <VideoSettings />
 
-          <div className="flex justify-center">
-            <Button
-              variant="default"
-              size="lg"
-              className="w-full max-w-xs"
-              disabled={!processState.currentFile}
-              onClick={() => {
-                if (!processState.currentFile) return;
-                invoke('process_video', {
-                  path: processState.currentFile,
-                  ...settings,
-                })
-                  .then(() => {
-                    console.log('处理完成');
-                    setCurrentFile(null);
-                  })
-                  .catch(console.error);
-              }}
-            >
-              开始生成
-            </Button>
-          </div>
+          <ProcessButton />
         </div>
       </div>
       <Toaster />
