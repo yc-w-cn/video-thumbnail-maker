@@ -11,11 +11,11 @@ export default function App() {
   return (
     <>
       <MainContainer>
-          <AppHeader />
-          <DependencyCheck />
-          <FileDropZone />
-          <VideoSettings />
-          <ProcessButton />
+        <AppHeader />
+        <DependencyCheck />
+        <FileDropZone />
+        <VideoSettings />
+        <ProcessButton />
       </MainContainer>
       <Toaster />
       <FileDropOverlay />

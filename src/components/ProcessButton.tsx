@@ -10,7 +10,7 @@ const ProcessButton = () => {
       <Button
         variant="default"
         size="lg"
-        className="w-full max-w-xs"
+        className="w-full max-w-xs dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
         disabled={!processState.currentFile}
         onClick={() => {
           if (!processState.currentFile) return;
