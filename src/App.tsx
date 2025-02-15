@@ -2,6 +2,7 @@ import FileDropOverlay from './components/FileDropOverlay';
 import { useAppStore } from './store';
 import DependencyCheck from './components/DependencyCheck';
 import { Toaster } from './components/ui/toaster';
+import FileDropZone from './components/FileDropZone';
 import VideoSettings from './components/VideoSettings';
 import ProcessButton from './components/ProcessButton';
 
@@ -21,13 +22,7 @@ export default function App() {
 
           <DependencyCheck />
 
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
-            <p className="text-gray-500">
-              {processState.currentFile
-                ? processState.currentFile.split('/').pop()
-                : '拖放视频文件到这里开始处理'}
-            </p>
-          </div>
+          <FileDropZone />
 
           <VideoSettings />
 
