@@ -1,4 +1,19 @@
 #[tauri::command]
+async fn check_dependencies() -> Result<(bool, bool), String> {
+    let ffmpeg_exists = check_command_exists("ffmpeg");
+    let magick_exists = check_command_exists("montage");
+    Ok((ffmpeg_exists, magick_exists))
+}
+
+fn check_command_exists(command: &str) -> bool {
+    std::process::Command::new("which")
+        .arg(command)
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+#[tauri::command]
 async fn process_video(
     path: String,
     thumbnails: u32,
@@ -78,7 +93,7 @@ fn execute_command(cmd: &str) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![process_video])
+        .invoke_handler(tauri::generate_handler![process_video, check_dependencies])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
