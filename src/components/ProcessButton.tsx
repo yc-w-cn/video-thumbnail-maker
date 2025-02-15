@@ -6,6 +6,7 @@ import { Progress } from './ui/progress';
 import { useToast } from '../hooks/use-toast';
 import { useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import { Loader2 } from 'lucide-react';
 
 const ProcessButton = () => {
   const { settings, processState, setCurrentFile, setProcessing, setProgress } =
@@ -62,7 +63,11 @@ const ProcessButton = () => {
             }
           }}
         >
-          开始生成
+          {processState.isProcessing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            '开始生成'
+          )}
         </Button>
         {processState.isProcessing && (
           <Progress value={processState.progress} className="w-full" />
