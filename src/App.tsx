@@ -1,28 +1,16 @@
 import FileDropOverlay from './components/FileDropOverlay';
 import { invoke } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Label } from './components/ui/label';
-import { Switch } from './components/ui/switch';
 import { useAppStore } from './store';
 import DependencyCheck from './components/DependencyCheck';
 import { Toaster } from './components/ui/toaster';
+import OutputLocation from './components/OutputLocation';
 
 export default function App() {
   const { settings, updateSettings, processState, setCurrentFile } =
     useAppStore();
-
-  const handleSelectOutputDir = async () => {
-    const selected = await open({
-      directory: true,
-      multiple: false,
-      defaultPath: settings.output,
-    });
-    if (selected) {
-      updateSettings({ output: selected as string });
-    }
-  };
 
   return (
     <>
@@ -45,8 +33,8 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-6">
+            <div className="flex flex-col space-y-2">
               <Label htmlFor="thumbnails" className="text-sm font-medium">
                 截图数量
               </Label>
@@ -61,7 +49,7 @@ export default function App() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col space-y-2">
               <Label htmlFor="width" className="text-sm font-medium">
                 缩略图宽度
               </Label>
@@ -76,7 +64,7 @@ export default function App() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col space-y-2">
               <Label htmlFor="cols" className="text-sm font-medium">
                 每行数量
               </Label>
@@ -91,40 +79,7 @@ export default function App() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">输出位置</Label>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="use-video-dir"
-                    checked={settings.useVideoDir}
-                    onCheckedChange={(checked) =>
-                      updateSettings({ useVideoDir: checked })
-                    }
-                  />
-                  <Label
-                    htmlFor="use-video-dir"
-                    className="text-sm text-gray-500"
-                  >
-                    保存在视频同目录
-                  </Label>
-                </div>
-                {!settings.useVideoDir && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSelectOutputDir}
-                  >
-                    选择文件夹
-                  </Button>
-                )}
-              </div>
-              {!settings.useVideoDir && (
-                <p className="text-sm text-gray-500 truncate">
-                  {settings.output}
-                </p>
-              )}
-            </div>
+            <OutputLocation />
           </div>
 
           <div className="flex justify-center">
