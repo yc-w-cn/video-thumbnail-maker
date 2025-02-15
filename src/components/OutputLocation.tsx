@@ -48,8 +48,8 @@ const OutputLocation: React.FC = () => {
               选择文件夹
             </Button>
             <p className="flex-1 text-sm text-gray-500 truncate">
-            <Marquee speed={20} autoFill={true}>
-              {settings.output}
+              <Marquee speed={20} autoFill={true}>
+                {settings.output}
               </Marquee>
             </p>
           </>
