@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { useAppStore } from '../store';
+import Marquee from 'react-fast-marquee';
 
 const OutputLocation: React.FC = () => {
   const { settings, updateSettings, processState } = useAppStore();
@@ -20,41 +21,40 @@ const OutputLocation: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-2 col-span-3">
       <Label className="text-sm font-medium">输出位置</Label>
-      <Switch
-        id="use-video-dir"
-        checked={settings.useVideoDir}
-        onCheckedChange={(checked) =>
-          updateSettings({ useVideoDir: checked })
-        }
-      />
-      <Label
-        htmlFor="use-video-dir"
-        className="text-sm text-gray-500"
-      >
-        保存在视频同目录
-      </Label>
-      {settings.useVideoDir ? (
-        <p className="text-sm text-gray-500 truncate max-w-[200px]">
-          {processState.currentFile
-            ? processState.currentFile.split('/').slice(0, -1).join('/')
-            : '请先选择视频文件'}
-        </p>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSelectOutputDir}
-          >
-            选择文件夹
-          </Button>
-          <p className="text-sm text-gray-500 truncate max-w-[200px]">
-            {settings.output}
+      <div className="flex items-center gap-2">
+        <Switch
+          id="use-video-dir"
+          checked={settings.useVideoDir}
+          onCheckedChange={(checked) =>
+            updateSettings({ useVideoDir: checked })
+          }
+          className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-400"
+        />
+        <Label htmlFor="use-video-dir" className="text-sm text-gray-500">
+          保存在视频同目录
+        </Label>
+        {settings.useVideoDir ? (
+          <p className="flex-1 text-sm text-gray-500 truncate relative">
+            <Marquee speed={20} autoFill={true}>
+              {processState.currentFile &&
+                processState.currentFile.split('/').slice(0, -1).join('/')}
+            </Marquee>
           </p>
-        </div>
-      )}
+        ) : (
+          <>
+            <Button variant="outline" size="sm" onClick={handleSelectOutputDir}>
+              选择文件夹
+            </Button>
+            <p className="flex-1 text-sm text-gray-500 truncate">
+            <Marquee speed={20} autoFill={true}>
+              {settings.output}
+              </Marquee>
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 };

@@ -26,7 +26,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full"
+      className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
       title={isDark ? '切换到浅色模式' : '切换到深色模式'}
     >
       {isDark ? (
