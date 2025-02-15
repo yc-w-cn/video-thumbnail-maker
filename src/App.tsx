@@ -7,25 +7,17 @@ import { Input } from './components/ui/input';
 import { Label } from './components/ui/label';
 import { Switch } from './components/ui/switch';
 import { useAppStore } from './store';
+import DependencyCheck from './components/DependencyCheck';
 
 export default function App() {
   const {
-    dependencies,
     settings,
-    setDependencies,
     updateSettings,
     processState,
     setCurrentFile,
   } = useAppStore();
 
-  React.useEffect(() => {
-    invoke('check_dependencies')
-      .then((result: unknown) => {
-        const [ffmpeg, magick] = result as [boolean, boolean];
-        setDependencies({ ffmpeg, magick });
-      })
-      .catch(console.error);
-  }, [setDependencies]);
+
 
   const handleSelectOutputDir = async () => {
     const selected = await open({
@@ -48,37 +40,7 @@ export default function App() {
           <p className="text-gray-500">快速生成视频预览缩略图</p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-          <h2 className="text-lg font-medium text-gray-900">系统依赖检查</h2>
-          {dependencies === null ? (
-            <div className="flex items-center justify-center h-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div
-                className={`p-3 rounded-lg ${dependencies.ffmpeg ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">
-                    {dependencies.ffmpeg ? '✅' : '❌'}
-                  </span>
-                  <span>FFmpeg</span>
-                </div>
-              </div>
-              <div
-                className={`p-3 rounded-lg ${dependencies.magick ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">
-                    {dependencies.magick ? '✅' : '❌'}
-                  </span>
-                  <span>ImageMagick</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <DependencyCheck />
 
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
           <p className="text-gray-500">拖放视频文件到这里开始处理</p>
