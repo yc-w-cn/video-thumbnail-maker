@@ -32,7 +32,7 @@ async fn process_video(
 
     // 生成 FFmpeg 命令
     let ffmpeg_cmd = format!(
-        "ffmpeg -i '{}' -vf 'scale={}:-1,fps=1/{}' -vframes {} '{}/thumb_%03d.jpg'",
+        "ffmpeg -i {:?} -vf 'scale={}:-1,fps=1/{}' -vframes {} '{}/thumb_%03d.jpg'",
         path,
         width,
         interval,
@@ -55,11 +55,11 @@ async fn process_video(
 
     // 生成 ImageMagick 命令
     let montage_cmd = format!(
-        "montage {}/*.jpg -tile {}x{} -geometry +0+0 {}",
+        "montage {}/*.jpg -tile {}x{} -geometry +0+0 {:?}",
         temp_dir.path().display(),
         cols,
         rows,
-        output_file_path.display()
+        output_file_path
     );
 
     execute_command(&montage_cmd)?;
