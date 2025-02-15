@@ -1,5 +1,6 @@
-use tauri::{AppHandle, Emitter};
 use ffmpeg_sidecar::{command::FfmpegCommand, event::FfmpegEvent};
+use regex::Regex;
+use tauri::{AppHandle, Emitter};
 
 #[tauri::command]
 async fn check_dependencies() -> Result<(bool, bool), String> {
@@ -37,14 +38,13 @@ async fn process_video(
     // 使用 ffmpeg_sidecar 创建命令
     let mut cmd = FfmpegCommand::new();
     cmd.input(&path)
+        .args(&["-loglevel", "info"]) // 确保输出包含进度信息
         .args(&["-vf", &format!("scale={}:-1,fps=1/{}", width, interval)])
         .args(&["-vframes", &thumbnails.to_string()])
         .output(&format!("{}/thumb_%03d.jpg", temp_dir.path().display()));
 
-    // 执行命令并处理进度
-    let mut total_frames = 0;
-
-    app.emit("progress-update", Some(0.0)).map_err(|e| e.to_string())?;
+    app.emit("progress-update", Some(0.0))
+        .map_err(|e| e.to_string())?;
 
     cmd.spawn()
         .map_err(|e| e.to_string())?
@@ -52,21 +52,38 @@ async fn process_video(
         .map_err(|e| e.to_string())?
         .for_each(|event| {
             match event {
-                FfmpegEvent::Progress(progress) => {
-                    if total_frames == 0 {
-                        total_frames = thumbnails;
-                    }
-                    let progress = (progress.frame as f32 / total_frames as f32 * 99.0) as f32;
-                    let _ = app.emit("progress-update", Some(progress));
+                FfmpegEvent::Progress(_) => {
+                    // 由于Progress事件未收到，这里不再处理
                 }
                 FfmpegEvent::Log(_, msg) => {
                     eprintln!("[ffmpeg] {}", msg);
+                    // 解析日志中的frame信息
+                    // 预编译正则表达式，避免重复创建
+                    let re = Regex::new(r"frame=\s*(\d+)").unwrap();
+
+                    if msg.contains("frame=") {
+                        if let Some(caps) = re.captures(&msg) {
+                            if let Some(frame_match) = caps.get(1) {
+                                let frame_str = frame_match.as_str();
+                                if let Ok(frame) = frame_str.parse::<u32>() {
+                                    let progress =
+                                        (frame as f32 / thumbnails as f32 * 99.0).min(99.0); // 确保不超过99%
+                                    eprintln!(
+                                        "[ffmpeg] 解析到帧数: {}, 计算进度: {}%",
+                                        frame, progress
+                                    );
+                                    let _ = app.emit("progress-update", Some(progress));
+                                }
+                            }
+                        }
+                    }
                 }
                 _ => {}
             }
         });
 
-    app.emit("progress-update", Some(99.0)).map_err(|e| e.to_string())?;
+    app.emit("progress-update", Some(99.0))
+        .map_err(|e| e.to_string())?;
 
     // 计算行数
     let rows = (thumbnails as f32 / cols as f32).ceil() as u32;
@@ -89,7 +106,8 @@ async fn process_video(
     );
 
     execute_command(&montage_cmd)?;
-    app.emit("progress-update", Some(100.0)).map_err(|e| e.to_string())?;
+    app.emit("progress-update", Some(100.0))
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -133,4 +151,3 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-

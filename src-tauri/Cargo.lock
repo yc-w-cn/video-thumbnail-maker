@@ -4760,6 +4760,7 @@ name = "video-thumbnail-maker"
 version = "0.1.0"
 dependencies = [
  "ffmpeg-sidecar",
+ "regex",
  "serde",
  "serde_json",
  "tauri",

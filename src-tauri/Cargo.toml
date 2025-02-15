@@ -25,4 +25,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri-plugin-dialog = "2"
 ffmpeg-sidecar = "2.0.5"
+regex = "1.11.1"
 
