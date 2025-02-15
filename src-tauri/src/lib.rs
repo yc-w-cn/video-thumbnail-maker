@@ -45,13 +45,21 @@ async fn process_video(
     // 计算行数
     let rows = (thumbnails as f32 / cols as f32).ceil() as u32;
 
+    // 从输入路径中提取文件名并更改扩展名为.jpg
+    let input_filename = std::path::Path::new(&path)
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or("output");
+    let output_filename = format!("{}.jpg", input_filename);
+    let output_file_path = output_path.join(output_filename);
+
     // 生成 ImageMagick 命令
     let montage_cmd = format!(
-        "montage {}/*.jpg -tile {}x{} -geometry +0+0 {}/output.jpg",
+        "montage {}/*.jpg -tile {}x{} -geometry +0+0 {}",
         temp_dir.path().display(),
         cols,
         rows,
-        output_path.display()
+        output_file_path.display()
     );
 
     execute_command(&montage_cmd)?;
