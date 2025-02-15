@@ -7,6 +7,7 @@ import { Label } from './components/ui/label';
 import { Switch } from './components/ui/switch';
 import { useAppStore } from './store';
 import DependencyCheck from './components/DependencyCheck';
+import { Toaster } from './components/ui/toaster';
 
 export default function App() {
   const { settings, updateSettings, processState, setCurrentFile } =
@@ -150,6 +151,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <Toaster />
       <FileDropOverlay />
     </>
   );
