@@ -1,4 +1,5 @@
 use tauri::{AppHandle, Emitter};
+use ffmpeg_sidecar::{command::FfmpegCommand, event::FfmpegEvent};
 
 #[tauri::command]
 async fn check_dependencies() -> Result<(bool, bool), String> {
@@ -33,20 +34,39 @@ async fn process_video(
     let duration = get_video_duration(&path)?;
     let interval = duration / thumbnails as f64;
 
-    // 生成 FFmpeg 命令
-    let ffmpeg_cmd = format!(
-        "ffmpeg -i {:?} -vf 'scale={}:-1,fps=1/{}' -vframes {} '{}/thumb_%03d.jpg'",
-        path,
-        width,
-        interval,
-        thumbnails,
-        temp_dir.path().display()
-    );
+    // 使用 ffmpeg_sidecar 创建命令
+    let mut cmd = FfmpegCommand::new();
+    cmd.input(&path)
+        .args(&["-vf", &format!("scale={}:-1,fps=1/{}", width, interval)])
+        .args(&["-vframes", &thumbnails.to_string()])
+        .output(&format!("{}/thumb_%03d.jpg", temp_dir.path().display()));
 
-    // 执行 FFmpeg 命令并发送进度
+    // 执行命令并处理进度
+    let mut total_frames = 0;
+
     app.emit("progress-update", Some(0.0)).map_err(|e| e.to_string())?;
-    execute_command(&ffmpeg_cmd)?;
-    app.emit("progress-update", Some(50.0)).map_err(|e| e.to_string())?;
+
+    cmd.spawn()
+        .map_err(|e| e.to_string())?
+        .iter()
+        .map_err(|e| e.to_string())?
+        .for_each(|event| {
+            match event {
+                FfmpegEvent::Progress(progress) => {
+                    if total_frames == 0 {
+                        total_frames = thumbnails;
+                    }
+                    let progress = (progress.frame as f32 / total_frames as f32 * 99.0) as f32;
+                    let _ = app.emit("progress-update", Some(progress));
+                }
+                FfmpegEvent::Log(_, msg) => {
+                    eprintln!("[ffmpeg] {}", msg);
+                }
+                _ => {}
+            }
+        });
+
+    app.emit("progress-update", Some(99.0)).map_err(|e| e.to_string())?;
 
     // 计算行数
     let rows = (thumbnails as f32 / cols as f32).ceil() as u32;
