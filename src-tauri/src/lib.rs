@@ -1,3 +1,5 @@
+use tauri::{AppHandle, Emitter};
+
 #[tauri::command]
 async fn check_dependencies() -> Result<(bool, bool), String> {
     let ffmpeg_exists = check_command_exists("ffmpeg");
@@ -15,6 +17,7 @@ fn check_command_exists(command: &str) -> bool {
 
 #[tauri::command]
 async fn process_video(
+    app: AppHandle,
     path: String,
     thumbnails: u32,
     width: u32,
@@ -40,7 +43,10 @@ async fn process_video(
         temp_dir.path().display()
     );
 
+    // 执行 FFmpeg 命令并发送进度
+    app.emit("progress-update", Some(0.0)).map_err(|e| e.to_string())?;
     execute_command(&ffmpeg_cmd)?;
+    app.emit("progress-update", Some(50.0)).map_err(|e| e.to_string())?;
 
     // 计算行数
     let rows = (thumbnails as f32 / cols as f32).ceil() as u32;
@@ -63,6 +69,7 @@ async fn process_video(
     );
 
     execute_command(&montage_cmd)?;
+    app.emit("progress-update", Some(100.0)).map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -106,3 +113,4 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
