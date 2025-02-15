@@ -29,9 +29,14 @@ const ProcessButton = () => {
           variant="default"
           size="lg"
           className="w-full dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
-          disabled={!processState.currentFile || processState.isProcessing}
+          disabled={processState.isProcessing}
           onClick={async () => {
-            if (!processState.currentFile) return;
+            if (!processState.currentFile) {
+              toast({
+                title: '请选择要处理的视频文件',
+              });
+              return;
+            }
             const output = settings.useVideoDir
               ? await dirname(processState.currentFile)
               : settings.output;
