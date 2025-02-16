@@ -1,8 +1,8 @@
 [package]
 name = "video-thumbnail-maker"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "1.0.0"
+description = "一个简单易用的视频缩略图生成工具，支持多种视频格式，可自定义缩略图数量和大小，提供灵活的布局配置和批量处理功能。"
+authors = ["yc-w-cn"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
