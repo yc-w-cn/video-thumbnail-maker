@@ -30,25 +30,48 @@ interface AppState {
   setCurrentFile: (file: string | null) => void;
 }
 
+const STORAGE_KEY = 'video-thumbnail-settings';
+
+const loadSettingsFromStorage = (): Partial<Settings> => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+    return {};
+  }
+};
+
+const saveSettingsToStorage = (settings: Settings) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch (e) {
+    console.error('Failed to save settings:', e);
+  }
+};
+
 export const useAppStore = create<AppState>((set) => ({
-  dependencies: null,
   settings: {
     thumbnails: 20,
     width: 200,
     output: '~/Pictures',
     cols: 5,
     useVideoDir: true,
+    ...loadSettingsFromStorage(),
   },
   processState: {
     isProcessing: false,
     progress: 0,
     currentFile: null,
   },
+  dependencies: null,
   setDependencies: (deps) => set({ dependencies: deps }),
   updateSettings: (newSettings) =>
-    set((state) => ({
-      settings: { ...state.settings, ...newSettings },
-    })),
+    set((state) => {
+      const updatedSettings = { ...state.settings, ...newSettings };
+      saveSettingsToStorage(updatedSettings);
+      return { settings: updatedSettings };
+    }),
   setProcessing: (isProcessing) =>
     set((state) => ({
       processState: { ...state.processState, isProcessing },
