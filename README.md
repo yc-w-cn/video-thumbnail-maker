@@ -18,6 +18,7 @@
 - 🌓 支持深色模式
 - 💾 自动保存设置
 - 📊 实时处理进度显示
+- 🌍 支持中英文双语界面
 
 ## 系统要求
 
@@ -64,6 +65,7 @@ sudo yum install ffmpeg imagemagick
 - React - 前端UI框架
 - TypeScript - 类型安全的JavaScript超集
 - Tailwind CSS - 实用优先的CSS框架
+- i18next - 强大的国际化解决方案
 
 ### 开发环境设置
 
@@ -77,6 +79,14 @@ pnpm tauri dev
 # 构建应用
 pnpm tauri build
 ```
+
+### 国际化开发
+
+本项目使用 i18next 进行国际化支持，语言文件位于 `src/i18n` 目录下。如需添加新的语言支持，请按照以下步骤操作：
+
+1. 在 `src/i18n` 目录下创建新的语言文件
+2. 在 `src/i18n/i18next.ts` 中注册新语言
+3. 使用 `useTranslation` hook 在组件中实现文本翻译
 
 ## 许可证
 
