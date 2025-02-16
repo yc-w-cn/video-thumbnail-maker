@@ -5,9 +5,11 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { useAppStore } from '../store';
 import Marquee from 'react-fast-marquee';
+import { useTranslation } from 'react-i18next';
 
 const OutputLocation: React.FC = () => {
   const { settings, updateSettings, processState } = useAppStore();
+  const { t } = useTranslation();
 
   const handleSelectOutputDir = async () => {
     const selected = await open({
@@ -22,7 +24,9 @@ const OutputLocation: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-2 col-span-3">
-      <Label className="text-sm font-medium">输出位置</Label>
+      <Label className="text-sm font-medium">
+        {t('settings.output.title')}
+      </Label>
       <div className="flex items-center gap-2">
         <Switch
           id="use-video-dir"
@@ -33,25 +37,25 @@ const OutputLocation: React.FC = () => {
           className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-400"
         />
         <Label htmlFor="use-video-dir" className="text-sm text-gray-500">
-          保存在视频同目录
+          {t('settings.output.current')}
         </Label>
         {settings.useVideoDir ? (
-          <p className="flex-1 text-sm text-gray-500 truncate relative">
+          <div className="flex-1 text-sm text-gray-500 truncate relative">
             <Marquee speed={20} autoFill={true}>
               {processState.currentFile &&
                 processState.currentFile.split('/').slice(0, -1).join('/')}
             </Marquee>
-          </p>
+          </div>
         ) : (
           <>
             <Button variant="outline" size="sm" onClick={handleSelectOutputDir}>
-              选择文件夹
+              {t('settings.output.select')}
             </Button>
-            <p className="flex-1 text-sm text-gray-500 truncate">
+            <div className="flex-1 text-sm text-gray-500 truncate">
               <Marquee speed={20} autoFill={true}>
                 {settings.output}
               </Marquee>
-            </p>
+            </div>
           </>
         )}
       </div>

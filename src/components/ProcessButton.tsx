@@ -7,11 +7,13 @@ import { useToast } from '../hooks/use-toast';
 import { useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ProcessButton = () => {
   const { settings, processState, setCurrentFile, setProcessing, setProgress } =
     useAppStore();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const unlisten = listen('progress-update', (event) => {
@@ -33,7 +35,8 @@ const ProcessButton = () => {
           onClick={async () => {
             if (!processState.currentFile) {
               toast({
-                title: '请选择要处理的视频文件',
+                title: t('status.error'),
+                description: t('actions.dropzone.title'),
               });
               return;
             }
@@ -51,14 +54,14 @@ const ProcessButton = () => {
                 output,
               });
               toast({
-                title: '处理成功',
-                description: '缩略图已生成完成',
+                title: t('status.complete'),
+                description: t('status.ready'),
               });
               setCurrentFile(null);
             } catch (error) {
               console.error(error);
               toast({
-                title: '处理失败',
+                title: t('status.error'),
                 description: String(error),
                 variant: 'destructive',
               });
@@ -71,7 +74,7 @@ const ProcessButton = () => {
           {processState.isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            '开始生成'
+            t('actions.process')
           )}
         </Button>
         {processState.isProcessing && (

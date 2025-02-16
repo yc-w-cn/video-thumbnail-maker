@@ -4,11 +4,13 @@ import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { UnlistenFn } from '@tauri-apps/api/event';
 import { useAppStore } from '../store';
 import { useToast } from '../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const FileDropOverlay: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const setCurrentFile = useAppStore((state) => state.setCurrentFile);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let unlisten: UnlistenFn | null = null;
@@ -23,8 +25,8 @@ const FileDropOverlay: React.FC = () => {
             setCurrentFile(file);
           } else if (file) {
             toast({
-              title: '不支持的文件格式',
-              description: '请选择 MP4 格式的视频文件',
+              title: t('status.unsupported_format'),
+              description: t('actions.dropzone.mp4_only'),
               variant: 'destructive',
             });
           }
@@ -49,7 +51,7 @@ const FileDropOverlay: React.FC = () => {
           <div className="w-screen h-screen flex flex-col justify-center items-center gap-4">
             <FileVideo className="text-white size-[30%]" />
             <span className="text-white text-3xl">
-              仅支持 MP4 格式的视频文件
+              {t('actions.dropzone.mp4_only')}
             </span>
           </div>
         </div>

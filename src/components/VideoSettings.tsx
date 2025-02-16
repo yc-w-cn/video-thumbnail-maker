@@ -3,9 +3,11 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useAppStore } from '../store';
 import OutputLocation from './OutputLocation';
+import { useTranslation } from 'react-i18next';
 
 const VideoSettings: React.FC = () => {
   const { settings, updateSettings } = useAppStore();
+  const { t } = useTranslation();
 
   return (
     <div className="grid grid-cols-3 gap-6">
@@ -14,7 +16,7 @@ const VideoSettings: React.FC = () => {
           htmlFor="thumbnails"
           className="text-sm font-medium text-gray-900 dark:text-gray-100"
         >
-          截图数量
+          {t('settings.video.thumbnails')}
         </Label>
         <Input
           id="thumbnails"
@@ -32,7 +34,7 @@ const VideoSettings: React.FC = () => {
           htmlFor="width"
           className="text-sm font-medium text-gray-900 dark:text-gray-100"
         >
-          缩略图宽度
+          {t('settings.video.width')}
         </Label>
         <Input
           id="width"
@@ -48,7 +50,7 @@ const VideoSettings: React.FC = () => {
           htmlFor="cols"
           className="text-sm font-medium text-gray-900 dark:text-gray-100"
         >
-          每行数量
+          {t('settings.video.cols')}
         </Label>
         <Input
           id="cols"
