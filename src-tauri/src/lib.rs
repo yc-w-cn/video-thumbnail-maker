@@ -26,13 +26,16 @@ async fn check_file_processed(video_path: String) -> Result<bool, String> {
     Ok(thumbnail_path.exists())
 }
 
-// 新增：递归遍历文件夹，查找所有MP4文件
+// 新增：递归遍历文件夹，查找所有视频文件
 #[tauri::command]
 async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, String> {
     let mut video_files = Vec::new();
     
+    // 支持的视频格式
+    let supported_extensions = ["mp4", "wmv", "mkv"];
+    
     // 递归遍历文件夹
-    fn scan_directory(dir: &Path, videos: &mut Vec<String>) -> Result<(), String> {
+    fn scan_directory(dir: &Path, videos: &mut Vec<String>, extensions: &[&str]) -> Result<(), String> {
         let entries = fs::read_dir(dir).map_err(|e| e.to_string())?;
         
         for entry in entries {
@@ -40,15 +43,16 @@ async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, Stri
             let path = entry.path();
             
             if path.is_file() {
-                // 检查是否为MP4文件
+                // 检查是否为支持的视频文件
                 if let Some(extension) = path.extension() {
-                    if extension.to_string_lossy().to_lowercase() == "mp4" {
+                    let ext = extension.to_string_lossy().to_lowercase();
+                    if extensions.contains(&ext.as_str()) {
                         videos.push(path.to_string_lossy().to_string());
                     }
                 }
             } else if path.is_dir() {
                 // 递归遍历子目录
-                scan_directory(&path, videos)?;
+                scan_directory(&path, videos, extensions)?;
             }
         }
         
@@ -64,7 +68,7 @@ async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, Stri
         return Err("Path is not a directory".to_string());
     }
     
-    scan_directory(path, &mut video_files)?;
+    scan_directory(&path, &mut video_files, &supported_extensions)?;
     
     Ok(video_files)
 }
@@ -216,4 +220,3 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-```

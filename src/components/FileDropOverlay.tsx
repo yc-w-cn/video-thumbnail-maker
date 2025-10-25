@@ -14,10 +14,19 @@ const FileDropOverlay: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  // 支持的视频格式
+  const supportedExtensions = ['mp4', 'wmv', 'mkv'];
+
+  // 检查文件是否为支持的视频格式
+  const isSupportedVideo = (path: string): boolean => {
+    const lowerPath = path.toLowerCase();
+    return supportedExtensions.some((ext) => lowerPath.endsWith(`.${ext}`));
+  };
+
   // 处理拖放的文件和文件夹
   const handleFileDrop = useCallback(
     async (paths: string[]) => {
-      let allMp4Files: string[] = [];
+      let allVideoFiles: string[] = [];
 
       // 遍历所有拖放的路径
       for (const path of paths) {
@@ -30,19 +39,19 @@ const FileDropOverlay: React.FC = () => {
               folderPath: path,
             },
           );
-          allMp4Files = [...allMp4Files, ...folderVideos];
+          allVideoFiles = [...allVideoFiles, ...folderVideos];
         } catch {
-          // 如果不是文件夹或扫描失败，检查是否为单个MP4文件
-          if (path?.toLowerCase().endsWith('.mp4')) {
-            allMp4Files.push(path);
+          // 如果不是文件夹或扫描失败，检查是否为单个视频文件
+          if (isSupportedVideo(path)) {
+            allVideoFiles.push(path);
           }
         }
       }
 
       // 去重
-      allMp4Files = [...new Set(allMp4Files)];
+      allVideoFiles = [...new Set(allVideoFiles)];
 
-      if (allMp4Files.length === 0) {
+      if (allVideoFiles.length === 0) {
         toast({
           title: t('status.error'),
           description: t('actions.dropzone.mp4_only'),
@@ -52,18 +61,18 @@ const FileDropOverlay: React.FC = () => {
       }
 
       // 设置第一个文件为当前文件（用于主界面显示）
-      if (allMp4Files.length > 0) {
-        setCurrentFile(allMp4Files[0]);
+      if (allVideoFiles.length > 0) {
+        setCurrentFile(allVideoFiles[0]);
       }
 
       // 批量添加到处理列表（带处理状态检查）
-      addMultipleToProcessingListWithCheck(allMp4Files);
+      addMultipleToProcessingListWithCheck(allVideoFiles);
 
       // 显示添加结果
       toast({
         title: t('status.success'),
         description: t('actions.dropzone.added_files', {
-          count: allMp4Files.length,
+          count: allVideoFiles.length,
         }),
       });
     },
