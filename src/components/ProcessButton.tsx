@@ -30,7 +30,7 @@ const ProcessButton = () => {
     return () => {
       unlisten.then((f) => f());
     };
-  }, []);
+  }, [setProgress]);
 
   const processSingleFile = async (filePath: string) => {
     const output = settings.useVideoDir
@@ -78,6 +78,10 @@ const ProcessButton = () => {
       if (processState.isPaused) {
         // 这里应该实现等待恢复的逻辑
         // 暂时跳过暂停逻辑
+        // 等待恢复的逻辑可以通过轮询或事件来实现
+        while (processState.isPaused) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
       }
 
       // 更新状态为处理中
@@ -126,7 +130,7 @@ const ProcessButton = () => {
         </Button>
 
         {/* 批量处理按钮 */}
-        {processingList.length > 1 && (
+        {processingList.length > 0 && (
           <Button
             variant="secondary"
             size="lg"

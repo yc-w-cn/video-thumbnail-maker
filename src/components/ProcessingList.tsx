@@ -4,6 +4,9 @@ import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { X, Play, Pause } from 'lucide-react';
 import ProcessingListItem from './ProcessingListItem';
+import { invoke } from '@tauri-apps/api/core';
+import { dirname } from '@tauri-apps/api/path';
+import { useToast } from '../hooks/use-toast';
 
 const ProcessingList: React.FC = () => {
   const {
@@ -13,13 +16,88 @@ const ProcessingList: React.FC = () => {
     clearProcessingList,
     processState,
     setPaused,
+    updateProcessingItemStatus,
+    settings,
+    setProcessing,
+    setProgress,
   } = useAppStore();
+  const { toast } = useToast();
   const { t } = useTranslation();
 
   // 使用useCallback包装togglePause函数，避免不必要的重新渲染
   const togglePause = useCallback(() => {
     setPaused(!processState.isPaused);
   }, [processState.isPaused, setPaused]);
+
+  // 处理单个文件
+  const processSingleFile = useCallback(
+    async (filePath: string) => {
+      const output = settings.useVideoDir
+        ? await dirname(filePath)
+        : settings.output;
+
+      setProcessing(true);
+      setPaused(false);
+      setProgress(0);
+
+      try {
+        await invoke('process_video', {
+          path: filePath,
+          thumbnails: settings.thumbnails,
+          width: settings.width,
+          cols: settings.cols,
+          output,
+        });
+
+        toast({
+          title: t('status.complete'),
+          description: t('status.ready'),
+        });
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: t('status.error'),
+          description: String(error),
+          variant: 'destructive',
+        });
+
+        return false;
+      } finally {
+        setProcessing(false);
+        setProgress(0);
+      }
+    },
+    [settings, setProcessing, setPaused, setProgress, toast, t],
+  );
+
+  // 处理所有文件
+  const processAllFiles = useCallback(async () => {
+    for (const item of processingList) {
+      // 如果已暂停，等待恢复
+      if (processState.isPaused) {
+        // 等待恢复的逻辑
+        while (processState.isPaused) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+
+      // 更新状态为处理中
+      updateProcessingItemStatus(item.id, 'processing');
+
+      // 处理文件
+      const success = await processSingleFile(item.filePath);
+
+      // 更新状态
+      updateProcessingItemStatus(item.id, success ? 'completed' : 'error');
+    }
+  }, [
+    processingList,
+    processState.isPaused,
+    updateProcessingItemStatus,
+    processSingleFile,
+  ]);
 
   // 不要在这里提前返回，确保Hook调用的一致性
   return (
@@ -64,7 +142,14 @@ const ProcessingList: React.FC = () => {
             {/* Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
               <div className="flex gap-2">
-                <Button className="flex-1" size="sm">
+                <Button
+                  className="flex-1"
+                  size="sm"
+                  disabled={
+                    processState.isProcessing || processingList.length === 0
+                  }
+                  onClick={processAllFiles}
+                >
                   <Play className="h-4 w-4 mr-1" />
                   {t('processingList.start')}
                 </Button>
@@ -92,6 +177,7 @@ const ProcessingList: React.FC = () => {
                 size="sm"
                 className="w-full"
                 onClick={clearProcessingList}
+                disabled={processState.isProcessing}
               >
                 {t('processingList.clear')}
               </Button>
