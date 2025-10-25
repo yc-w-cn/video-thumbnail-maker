@@ -5,6 +5,7 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { useAppStore } from '../store';
 import { useToast } from '../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { invoke } from '@tauri-apps/api/core';
 
 const FileDropOverlay: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
@@ -16,12 +17,32 @@ const FileDropOverlay: React.FC = () => {
   // 处理拖放的文件和文件夹
   const handleFileDrop = useCallback(
     async (paths: string[]) => {
-      // 过滤出MP4文件
-      const mp4Files = paths.filter((path) =>
-        path?.toLowerCase().endsWith('.mp4'),
-      );
+      let allMp4Files: string[] = [];
 
-      if (mp4Files.length === 0) {
+      // 遍历所有拖放的路径
+      for (const path of paths) {
+        // 检查路径是文件还是文件夹
+        try {
+          // 尝试扫描文件夹中的视频文件
+          const folderVideos = await invoke<string[]>(
+            'scan_folder_for_videos',
+            {
+              folderPath: path,
+            },
+          );
+          allMp4Files = [...allMp4Files, ...folderVideos];
+        } catch {
+          // 如果不是文件夹或扫描失败，检查是否为单个MP4文件
+          if (path?.toLowerCase().endsWith('.mp4')) {
+            allMp4Files.push(path);
+          }
+        }
+      }
+
+      // 去重
+      allMp4Files = [...new Set(allMp4Files)];
+
+      if (allMp4Files.length === 0) {
         toast({
           title: t('status.error'),
           description: t('actions.dropzone.mp4_only'),
@@ -31,18 +52,18 @@ const FileDropOverlay: React.FC = () => {
       }
 
       // 设置第一个文件为当前文件（用于主界面显示）
-      if (mp4Files.length > 0) {
-        setCurrentFile(mp4Files[0]);
+      if (allMp4Files.length > 0) {
+        setCurrentFile(allMp4Files[0]);
       }
 
       // 批量添加到处理列表（带处理状态检查）
-      addMultipleToProcessingListWithCheck(mp4Files);
+      addMultipleToProcessingListWithCheck(allMp4Files);
 
       // 显示添加结果
       toast({
         title: t('status.success'),
         description: t('actions.dropzone.added_files', {
-          count: mp4Files.length,
+          count: allMp4Files.length,
         }),
       });
     },

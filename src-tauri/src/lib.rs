@@ -2,6 +2,7 @@ use ffmpeg_sidecar::{command::FfmpegCommand, event::FfmpegEvent};
 use regex::Regex;
 use tauri::{AppHandle, Emitter};
 use std::path::Path;
+use std::fs;
 
 #[tauri::command]
 async fn check_dependencies() -> Result<(bool, bool), String> {
@@ -23,6 +24,49 @@ async fn check_file_processed(video_path: String) -> Result<bool, String> {
     
     // 检查缩略图文件是否存在
     Ok(thumbnail_path.exists())
+}
+
+// 新增：递归遍历文件夹，查找所有MP4文件
+#[tauri::command]
+async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, String> {
+    let mut video_files = Vec::new();
+    
+    // 递归遍历文件夹
+    fn scan_directory(dir: &Path, videos: &mut Vec<String>) -> Result<(), String> {
+        let entries = fs::read_dir(dir).map_err(|e| e.to_string())?;
+        
+        for entry in entries {
+            let entry = entry.map_err(|e| e.to_string())?;
+            let path = entry.path();
+            
+            if path.is_file() {
+                // 检查是否为MP4文件
+                if let Some(extension) = path.extension() {
+                    if extension.to_string_lossy().to_lowercase() == "mp4" {
+                        videos.push(path.to_string_lossy().to_string());
+                    }
+                }
+            } else if path.is_dir() {
+                // 递归遍历子目录
+                scan_directory(&path, videos)?;
+            }
+        }
+        
+        Ok(())
+    }
+    
+    let path = Path::new(&folder_path);
+    if !path.exists() {
+        return Err("Folder does not exist".to_string());
+    }
+    
+    if !path.is_dir() {
+        return Err("Path is not a directory".to_string());
+    }
+    
+    scan_directory(path, &mut video_files)?;
+    
+    Ok(video_files)
 }
 
 fn check_command_exists(command: &str) -> bool {
@@ -166,8 +210,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             process_video, 
             check_dependencies,
-            check_file_processed
+            check_file_processed,
+            scan_folder_for_videos  // 添加新的命令
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+```
