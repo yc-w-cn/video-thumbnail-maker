@@ -153,7 +153,7 @@ export const useAppStore = create<AppState>((set) => ({
   addMultipleToProcessingList: (filePaths) =>
     set((state) => {
       const newItems: ProcessingItem[] = [];
-      
+
       for (const filePath of filePaths) {
         // 检查是否已存在
         const exists = state.processingList.some(
