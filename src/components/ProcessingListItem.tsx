@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppStore } from '../store';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Clock, Play, AlertCircle } from 'lucide-react';
+import { Check, Clock, Play, AlertCircle, Trash } from 'lucide-react';
 import { Progress } from './ui/progress';
 
 interface ProcessingListItemProps {
@@ -74,10 +74,11 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
       </div>
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
+        className="cursor-pointer hover:outline-red-500 hover:outline bg-transparent size-6"
         onClick={() => removeFromProcessingList(id)}
       >
-        <X className="h-4 w-4" />
+        <Trash className="h-2 w-2" color="red" />
       </Button>
     </li>
   );
