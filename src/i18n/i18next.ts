@@ -61,6 +61,21 @@ const resources = {
       dependencies: {
         title: 'System Dependencies Check',
       },
+      // 新增处理列表翻译
+      processingList: {
+        title: 'Processing List',
+        empty: 'No files in the processing list',
+        toggle: 'Toggle Processing List',
+        start: 'Start Processing',
+        pause: 'Pause',
+        clear: 'Clear List',
+        status: {
+          pending: 'Pending',
+          processing: 'Processing',
+          completed: 'Completed',
+          error: 'Error',
+        },
+      },
     },
   },
   zh: {
@@ -121,6 +136,21 @@ const resources = {
       },
       dependencies: {
         title: '系统依赖检查',
+      },
+      // 新增处理列表翻译
+      processingList: {
+        title: '处理列表',
+        empty: '处理列表中没有文件',
+        toggle: '切换处理列表',
+        start: '开始处理',
+        pause: '暂停',
+        clear: '清空列表',
+        status: {
+          pending: '待处理',
+          processing: '处理中',
+          completed: '已完成',
+          error: '错误',
+        },
       },
     },
   },

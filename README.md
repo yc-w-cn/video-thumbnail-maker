@@ -21,6 +21,7 @@ A simple and easy-to-use video thumbnail generator that quickly extracts multipl
 - 💾 Automatic settings save
 - 📊 Real-time processing progress display
 - 🌍 Bilingual interface (English/Chinese)
+- 📋 Processing list with batch operations
 
 ## System Requirements
 
@@ -56,8 +57,13 @@ sudo yum install ffmpeg imagemagick
    - Screenshot count: Determines how many frames to extract from the video
    - Thumbnail width: Sets the width of each thumbnail (height will adjust proportionally)
    - Thumbnails per row: Sets the number of thumbnails to display per row in the final composite image
-3. Drag and drop video files into the application window to start processing
-4. Once processing is complete, find the generated preview image in the specified output directory
+3. Drag and drop video files into the application window to add them to the processing list
+4. Use the processing list to manage multiple files:
+   - View the status of each file (pending, processing, completed, error)
+   - Remove individual files from the list
+   - Clear the entire list
+   - Start batch processing of all files
+5. Once processing is complete, find the generated preview images in the specified output directory
 
 ## Development
 

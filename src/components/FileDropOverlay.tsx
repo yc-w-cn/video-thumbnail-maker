@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FileVideo } from 'lucide-react';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { UnlistenFn } from '@tauri-apps/api/event';
@@ -8,9 +8,33 @@ import { useTranslation } from 'react-i18next';
 
 const FileDropOverlay: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
-  const setCurrentFile = useAppStore((state) => state.setCurrentFile);
+  const { setCurrentFile, addToProcessingList, checkIfFileProcessed } =
+    useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  // 使用useCallback包装处理函数，避免不必要的重新渲染
+  const handleFileDrop = useCallback(
+    async (file: string) => {
+      setCurrentFile(file);
+      // 添加到处理列表
+      addToProcessingList(file);
+
+      // 检查文件是否已处理
+      try {
+        const isProcessed = await checkIfFileProcessed(file);
+        // 这里可以更新文件状态，但需要获取正确的项目ID
+        // 由于状态更新是异步的，我们需要稍后处理
+        if (isProcessed) {
+          // 如果需要更新状态，可以通过ID来更新
+          // updateProcessingItemStatus(id, 'completed');
+        }
+      } catch (error) {
+        console.error('Error checking if file is processed:', error);
+      }
+    },
+    [setCurrentFile, addToProcessingList, checkIfFileProcessed],
+  );
 
   useEffect(() => {
     let unlisten: UnlistenFn | null = null;
@@ -22,7 +46,7 @@ const FileDropOverlay: React.FC = () => {
           setIsHovering(false);
           const file = event.payload.paths?.[0];
           if (file?.toLowerCase().endsWith('.mp4')) {
-            setCurrentFile(file);
+            handleFileDrop(file);
           } else if (file) {
             toast({
               title: t('status.unsupported_format'),
@@ -42,7 +66,7 @@ const FileDropOverlay: React.FC = () => {
         unlisten();
       }
     };
-  }, [setCurrentFile]);
+  }, [handleFileDrop, toast, t]);
 
   return (
     <>

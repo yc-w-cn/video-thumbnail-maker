@@ -1,12 +1,28 @@
 use ffmpeg_sidecar::{command::FfmpegCommand, event::FfmpegEvent};
 use regex::Regex;
 use tauri::{AppHandle, Emitter};
+use std::path::Path;
 
 #[tauri::command]
 async fn check_dependencies() -> Result<(bool, bool), String> {
     let ffmpeg_exists = check_command_exists("ffmpeg");
     let magick_exists = check_command_exists("montage");
     Ok((ffmpeg_exists, magick_exists))
+}
+
+#[tauri::command]
+async fn check_file_processed(video_path: String) -> Result<bool, String> {
+    // 获取视频文件的目录和文件名
+    let path = Path::new(&video_path);
+    let parent = path.parent().ok_or("Invalid video path")?;
+    let file_stem = path.file_stem().ok_or("Invalid video path")?;
+    
+    // 构造缩略图文件路径
+    let thumbnail_file_name = format!("{}.jpg", file_stem.to_string_lossy());
+    let thumbnail_path = parent.join(thumbnail_file_name);
+    
+    // 检查缩略图文件是否存在
+    Ok(thumbnail_path.exists())
 }
 
 fn check_command_exists(command: &str) -> bool {
@@ -147,7 +163,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![process_video, check_dependencies])
+        .invoke_handler(tauri::generate_handler![
+            process_video, 
+            check_dependencies,
+            check_file_processed
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

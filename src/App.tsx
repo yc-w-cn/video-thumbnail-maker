@@ -6,6 +6,7 @@ import VideoSettings from './components/VideoSettings';
 import ProcessButton from './components/ProcessButton';
 import AppHeader from './components/AppHeader';
 import MainContainer from './components/MainContainer';
+import ProcessingList from './components/ProcessingList';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -31,6 +32,7 @@ export default function App() {
       </MainContainer>
       <Toaster />
       <FileDropOverlay />
+      <ProcessingList />
     </>
   );
 }

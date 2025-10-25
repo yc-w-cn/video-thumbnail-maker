@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { invoke } from '@tauri-apps/api/core';
 
 interface DependencyState {
   ffmpeg: boolean;
@@ -15,19 +16,45 @@ interface Settings {
 
 interface ProcessState {
   isProcessing: boolean;
+  isPaused: boolean;
   progress: number;
   currentFile: string | null;
+}
+
+// 新增处理列表项接口
+interface ProcessingItem {
+  id: string;
+  filePath: string;
+  fileName: string;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  outputPath?: string;
 }
 
 interface AppState {
   dependencies: DependencyState | null;
   settings: Settings;
   processState: ProcessState;
+  // 新增处理列表状态
+  processingList: ProcessingItem[];
+  showProcessingList: boolean;
   setDependencies: (deps: DependencyState) => void;
   updateSettings: (settings: Partial<Settings>) => void;
   setProcessing: (isProcessing: boolean) => void;
+  setPaused: (isPaused: boolean) => void;
   setProgress: (progress: number) => void;
   setCurrentFile: (file: string | null) => void;
+  // 新增处理列表相关方法
+  setShowProcessingList: (show: boolean) => void;
+  addToProcessingList: (file: string) => void;
+  removeFromProcessingList: (id: string) => void;
+  clearProcessingList: () => void;
+  updateProcessingItemStatus: (
+    id: string,
+    status: ProcessingItem['status'],
+  ) => void;
+  setProcessingList: (list: ProcessingItem[]) => void;
+  // 检查文件是否已处理的方法
+  checkIfFileProcessed: (filePath: string) => Promise<boolean>;
 }
 
 const STORAGE_KEY = 'video-thumbnail-settings';
@@ -61,9 +88,13 @@ export const useAppStore = create<AppState>((set) => ({
   },
   processState: {
     isProcessing: false,
+    isPaused: false,
     progress: 0,
     currentFile: null,
   },
+  // 初始化处理列表状态
+  processingList: [],
+  showProcessingList: false,
   dependencies: null,
   setDependencies: (deps) => set({ dependencies: deps }),
   updateSettings: (newSettings) =>
@@ -76,6 +107,10 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       processState: { ...state.processState, isProcessing },
     })),
+  setPaused: (isPaused) =>
+    set((state) => ({
+      processState: { ...state.processState, isPaused },
+    })),
   setProgress: (progress) =>
     set((state) => ({
       processState: { ...state.processState, progress },
@@ -84,4 +119,52 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       processState: { ...state.processState, currentFile },
     })),
+  // 处理列表相关方法实现
+  setShowProcessingList: (show) => set({ showProcessingList: show }),
+  addToProcessingList: (filePath) =>
+    set((state) => {
+      // 检查是否已存在
+      const exists = state.processingList.some(
+        (item) => item.filePath === filePath,
+      );
+      if (exists) return state;
+
+      // 提取文件名
+      const fileName = filePath.split('/').pop() || filePath;
+
+      const newItem: ProcessingItem = {
+        id: Date.now().toString(),
+        filePath,
+        fileName: fileName || '',
+        status: 'pending',
+      };
+
+      return {
+        processingList: [...state.processingList, newItem],
+      };
+    }),
+  removeFromProcessingList: (id) =>
+    set((state) => ({
+      processingList: state.processingList.filter((item) => item.id !== id),
+    })),
+  clearProcessingList: () => set({ processingList: [] }),
+  updateProcessingItemStatus: (id, status) =>
+    set((state) => ({
+      processingList: state.processingList.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    })),
+  setProcessingList: (processingList) => set({ processingList }),
+  // 检查文件是否已处理的实现
+  checkIfFileProcessed: async (filePath: string) => {
+    try {
+      const result = await invoke<boolean>('check_file_processed', {
+        videoPath: filePath,
+      });
+      return result;
+    } catch (error) {
+      console.error('Error checking if file is processed:', error);
+      return false;
+    }
+  },
 }));

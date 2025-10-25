@@ -1,6 +1,7 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
+import ProcessingListButton from './ProcessingListButton';
 import { useTranslation } from 'react-i18next';
 
 const AppHeader: React.FC = () => {
@@ -15,6 +16,9 @@ const AppHeader: React.FC = () => {
         <p className="text-gray-500 dark:text-gray-400">
           {t('app.description')}
         </p>
+      </div>
+      <div className="absolute left-0 top-0 flex gap-0">
+        <ProcessingListButton />
       </div>
       <div className="absolute right-0 top-0 flex gap-0">
         <LanguageToggle />
