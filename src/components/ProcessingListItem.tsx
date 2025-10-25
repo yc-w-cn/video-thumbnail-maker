@@ -35,14 +35,28 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
     return t(`processingList.status.${status}`);
   };
 
+  // 检查是否为已处理文件
+  const isProcessed = status === 'completed';
+
   return (
-    <li className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+    <li
+      className={`flex items-center justify-between p-2 rounded ${
+        isProcessed
+          ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800'
+          : 'bg-gray-50 dark:bg-gray-800'
+      }`}
+    >
       <div className="flex items-center space-x-2 flex-1 min-w-0">
         {getStatusIcon()}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{fileName}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {getStatusText()}
+            {isProcessed && (
+              <span className="ml-1 text-green-600 dark:text-green-400">
+                ({t('processingList.status.completed')})
+              </span>
+            )}
           </p>
         </div>
       </div>

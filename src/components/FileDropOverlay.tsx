@@ -8,32 +8,44 @@ import { useTranslation } from 'react-i18next';
 
 const FileDropOverlay: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
-  const { setCurrentFile, addToProcessingList, checkIfFileProcessed } =
-    useAppStore();
+  const { setCurrentFile, addMultipleToProcessingList } = useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // 使用useCallback包装处理函数，避免不必要的重新渲染
+  // 处理拖放的文件和文件夹
   const handleFileDrop = useCallback(
-    async (file: string) => {
-      setCurrentFile(file);
-      // 添加到处理列表
-      addToProcessingList(file);
+    async (paths: string[]) => {
+      // 过滤出MP4文件
+      const mp4Files = paths.filter((path) =>
+        path?.toLowerCase().endsWith('.mp4'),
+      );
 
-      // 检查文件是否已处理
-      try {
-        const isProcessed = await checkIfFileProcessed(file);
-        // 这里可以更新文件状态，但需要获取正确的项目ID
-        // 由于状态更新是异步的，我们需要稍后处理
-        if (isProcessed) {
-          // 如果需要更新状态，可以通过ID来更新
-          // updateProcessingItemStatus(id, 'completed');
-        }
-      } catch (error) {
-        console.error('Error checking if file is processed:', error);
+      if (mp4Files.length === 0) {
+        toast({
+          title: t('status.error'),
+          description: t('actions.dropzone.mp4_only'),
+          variant: 'destructive',
+        });
+        return;
       }
+
+      // 设置第一个文件为当前文件（用于主界面显示）
+      if (mp4Files.length > 0) {
+        setCurrentFile(mp4Files[0]);
+      }
+
+      // 批量添加到处理列表
+      addMultipleToProcessingList(mp4Files);
+
+      // 显示添加结果
+      toast({
+        title: t('status.success'),
+        description: t('actions.dropzone.added_files', {
+          count: mp4Files.length,
+        }),
+      });
     },
-    [setCurrentFile, addToProcessingList, checkIfFileProcessed],
+    [setCurrentFile, addMultipleToProcessingList, toast, t],
   );
 
   useEffect(() => {
@@ -44,15 +56,9 @@ const FileDropOverlay: React.FC = () => {
           setIsHovering(true);
         } else if (event.payload.type === 'drop') {
           setIsHovering(false);
-          const file = event.payload.paths?.[0];
-          if (file?.toLowerCase().endsWith('.mp4')) {
-            handleFileDrop(file);
-          } else if (file) {
-            toast({
-              title: t('status.unsupported_format'),
-              description: t('actions.dropzone.mp4_only'),
-              variant: 'destructive',
-            });
+          const paths = event.payload.paths;
+          if (paths && paths.length > 0) {
+            handleFileDrop(paths);
           }
         } else {
           setIsHovering(false);
@@ -66,7 +72,7 @@ const FileDropOverlay: React.FC = () => {
         unlisten();
       }
     };
-  }, [handleFileDrop, toast, t]);
+  }, [handleFileDrop]);
 
   return (
     <>

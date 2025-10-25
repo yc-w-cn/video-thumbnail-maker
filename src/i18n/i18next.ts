@@ -9,6 +9,14 @@ const resources = {
         description: 'Something went wrong while rendering the application.',
         retry: 'Retry',
       },
+      status: {
+        checking: 'Checking dependencies...',
+        ready: 'Ready',
+        processing: 'Processing...',
+        complete: 'Complete',
+        error: 'Error',
+        success: 'Success',
+      },
       app: {
         title: 'Video Thumbnail Maker',
         description: 'A simple and easy-to-use video thumbnail generator',
@@ -35,14 +43,9 @@ const resources = {
         dropzone: {
           title: 'Drop video files here',
           description: 'or click to select files',
+          mp4_only: 'Only MP4 files are supported',
+          added_files: '{{count}} files added to processing list',
         },
-      },
-      status: {
-        checking: 'Checking dependencies...',
-        ready: 'Ready',
-        processing: 'Processing...',
-        complete: 'Complete',
-        error: 'Error',
       },
       theme: {
         light: 'Light',
@@ -69,6 +72,7 @@ const resources = {
         start: 'Start Processing',
         pause: 'Pause',
         clear: 'Clear List',
+        skip: 'Skip processed files',
         status: {
           pending: 'Pending',
           processing: 'Processing',
@@ -81,9 +85,17 @@ const resources = {
   zh: {
     translation: {
       error: {
-        title: 'An Error Occurred',
-        description: 'Something went wrong while rendering the application.',
-        retry: 'Retry',
+        title: '发生错误',
+        description: '渲染应用程序时出现问题。',
+        retry: '重试',
+      },
+      status: {
+        checking: '正在检查依赖...',
+        ready: '就绪',
+        processing: '处理中...',
+        complete: '完成',
+        error: '错误',
+        success: '成功',
       },
       app: {
         title: '视频缩略图生成器',
@@ -111,14 +123,9 @@ const resources = {
         dropzone: {
           title: '将视频文件拖放到此处',
           description: '或点击选择文件',
+          mp4_only: '仅支持MP4文件',
+          added_files: '已添加{{count}}个文件到处理列表',
         },
-      },
-      status: {
-        checking: '正在检查依赖...',
-        ready: '就绪',
-        processing: '处理中...',
-        complete: '完成',
-        error: '错误',
       },
       theme: {
         light: '浅色',
@@ -145,6 +152,7 @@ const resources = {
         start: '开始处理',
         pause: '暂停',
         clear: '清空列表',
+        skip: '跳过已处理文件',
         status: {
           pending: '待处理',
           processing: '处理中',

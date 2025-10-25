@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAppStore } from '../store';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ const ProcessingList: React.FC = () => {
   } = useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [skipProcessed, setSkipProcessed] = useState(true);
 
   // 使用useCallback包装togglePause函数，避免不必要的重新渲染
   const togglePause = useCallback(() => {
@@ -74,7 +75,12 @@ const ProcessingList: React.FC = () => {
 
   // 处理所有文件
   const processAllFiles = useCallback(async () => {
-    for (const item of processingList) {
+    // 过滤出需要处理的文件
+    const filesToProcess = skipProcessed
+      ? processingList.filter((item) => item.status !== 'completed')
+      : processingList;
+
+    for (const item of filesToProcess) {
       // 如果已暂停，等待恢复
       if (processState.isPaused) {
         // 等待恢复的逻辑
@@ -94,10 +100,16 @@ const ProcessingList: React.FC = () => {
     }
   }, [
     processingList,
+    skipProcessed,
     processState.isPaused,
     updateProcessingItemStatus,
     processSingleFile,
   ]);
+
+  // 切换跳过已处理文件选项
+  const toggleSkipProcessed = useCallback(() => {
+    setSkipProcessed(!skipProcessed);
+  }, [skipProcessed]);
 
   // 不要在这里提前返回，确保Hook调用的一致性
   return (
@@ -141,6 +153,20 @@ const ProcessingList: React.FC = () => {
 
             {/* Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              {/* 跳过已处理文件选项 */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="skipProcessed"
+                  checked={skipProcessed}
+                  onChange={toggleSkipProcessed}
+                  className="mr-2"
+                />
+                <label htmlFor="skipProcessed" className="text-sm">
+                  {t('processingList.skip')}
+                </label>
+              </div>
+
               <div className="flex gap-2">
                 <Button
                   className="flex-1"

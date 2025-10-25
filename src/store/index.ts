@@ -46,6 +46,7 @@ interface AppState {
   // 新增处理列表相关方法
   setShowProcessingList: (show: boolean) => void;
   addToProcessingList: (file: string) => void;
+  addMultipleToProcessingList: (files: string[]) => void;
   removeFromProcessingList: (id: string) => void;
   clearProcessingList: () => void;
   updateProcessingItemStatus: (
@@ -55,6 +56,12 @@ interface AppState {
   setProcessingList: (list: ProcessingItem[]) => void;
   // 检查文件是否已处理的方法
   checkIfFileProcessed: (filePath: string) => Promise<boolean>;
+  // 更新处理项状态和输出路径
+  updateProcessingItemStatusAndOutput: (
+    id: string,
+    status: ProcessingItem['status'],
+    outputPath?: string,
+  ) => void;
 }
 
 const STORAGE_KEY = 'video-thumbnail-settings';
@@ -143,6 +150,34 @@ export const useAppStore = create<AppState>((set) => ({
         processingList: [...state.processingList, newItem],
       };
     }),
+  addMultipleToProcessingList: (filePaths) =>
+    set((state) => {
+      const newItems: ProcessingItem[] = [];
+      
+      for (const filePath of filePaths) {
+        // 检查是否已存在
+        const exists = state.processingList.some(
+          (item) => item.filePath === filePath,
+        );
+        if (exists) continue;
+
+        // 提取文件名
+        const fileName = filePath.split('/').pop() || filePath;
+
+        const newItem: ProcessingItem = {
+          id: `${Date.now()}-${Math.random()}`,
+          filePath,
+          fileName: fileName || '',
+          status: 'pending',
+        };
+
+        newItems.push(newItem);
+      }
+
+      return {
+        processingList: [...state.processingList, ...newItems],
+      };
+    }),
   removeFromProcessingList: (id) =>
     set((state) => ({
       processingList: state.processingList.filter((item) => item.id !== id),
@@ -152,6 +187,12 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       processingList: state.processingList.map((item) =>
         item.id === id ? { ...item, status } : item,
+      ),
+    })),
+  updateProcessingItemStatusAndOutput: (id, status, outputPath) =>
+    set((state) => ({
+      processingList: state.processingList.map((item) =>
+        item.id === id ? { ...item, status, outputPath } : item,
       ),
     })),
   setProcessingList: (processingList) => set({ processingList }),
