@@ -7,6 +7,7 @@ import ProcessingListItem from './ProcessingListItem';
 import { invoke } from '@tauri-apps/api/core';
 import { dirname } from '@tauri-apps/api/path';
 import { useToast } from '../hooks/use-toast';
+import { listen } from '@tauri-apps/api/event';
 
 const ProcessingList: React.FC = () => {
   const {
@@ -20,6 +21,7 @@ const ProcessingList: React.FC = () => {
     settings,
     setProcessing,
     setProgress,
+    updateProcessingItemProgress,
   } = useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -32,7 +34,7 @@ const ProcessingList: React.FC = () => {
 
   // 处理单个文件
   const processSingleFile = useCallback(
-    async (filePath: string) => {
+    async (itemId: string, filePath: string) => {
       const output = settings.useVideoDir
         ? await dirname(filePath)
         : settings.output;
@@ -42,6 +44,14 @@ const ProcessingList: React.FC = () => {
       setProgress(0);
 
       try {
+        // 监听进度更新事件
+        const unlisten = await listen('progress-update', (event) => {
+          const progress = event.payload as number;
+          setProgress(progress);
+          // 更新处理项的进度
+          updateProcessingItemProgress(itemId, progress);
+        });
+
         await invoke('process_video', {
           path: filePath,
           thumbnails: settings.thumbnails,
@@ -49,6 +59,9 @@ const ProcessingList: React.FC = () => {
           cols: settings.cols,
           output,
         });
+
+        // 处理完成后取消监听
+        unlisten();
 
         toast({
           title: t('status.complete'),
@@ -70,7 +83,15 @@ const ProcessingList: React.FC = () => {
         setProgress(0);
       }
     },
-    [settings, setProcessing, setPaused, setProgress, toast, t],
+    [
+      settings,
+      setProcessing,
+      setPaused,
+      setProgress,
+      toast,
+      t,
+      updateProcessingItemProgress,
+    ],
   );
 
   // 处理所有文件
@@ -92,8 +113,8 @@ const ProcessingList: React.FC = () => {
       // 更新状态为处理中
       updateProcessingItemStatus(item.id, 'processing');
 
-      // 处理文件
-      const success = await processSingleFile(item.filePath);
+      // 处理文件（传递处理项ID以便更新进度）
+      const success = await processSingleFile(item.id, item.filePath);
 
       // 更新状态
       updateProcessingItemStatus(item.id, success ? 'completed' : 'error');
@@ -145,6 +166,7 @@ const ProcessingList: React.FC = () => {
                       id={item.id}
                       fileName={item.fileName}
                       status={item.status}
+                      progress={item.progress}
                     />
                   ))}
                 </ul>

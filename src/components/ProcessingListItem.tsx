@@ -3,17 +3,20 @@ import { useAppStore } from '../store';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Clock, Play, AlertCircle } from 'lucide-react';
+import { Progress } from './ui/progress';
 
 interface ProcessingListItemProps {
   id: string;
   fileName: string;
   status: 'pending' | 'processing' | 'completed' | 'error';
+  progress?: number; // 添加进度属性
 }
 
 const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
   id,
   fileName,
   status,
+  progress = 0, // 默认进度为0
 }) => {
   const { removeFromProcessingList } = useAppStore();
   const { t } = useTranslation();
@@ -58,6 +61,15 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
               </span>
             )}
           </p>
+          {/* 显示处理进度 */}
+          {status === 'processing' && (
+            <div className="mt-1">
+              <Progress value={progress} className="h-1" />
+              <span className="text-xs text-blue-500">
+                {Math.round(progress)}%
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <Button

@@ -27,6 +27,7 @@ interface ProcessingItem {
   filePath: string;
   fileName: string;
   status: 'pending' | 'processing' | 'completed' | 'error';
+  progress?: number; // 添加进度字段
   outputPath?: string;
 }
 
@@ -54,6 +55,8 @@ interface AppState {
     id: string,
     status: ProcessingItem['status'],
   ) => void;
+  // 更新处理项进度
+  updateProcessingItemProgress: (id: string, progress: number) => void;
   setProcessingList: (list: ProcessingItem[]) => void;
   // 检查文件是否已处理的方法
   checkIfFileProcessed: (filePath: string) => Promise<boolean>;
@@ -226,6 +229,13 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       processingList: state.processingList.map((item) =>
         item.id === id ? { ...item, status } : item,
+      ),
+    })),
+  // 更新处理项进度的实现
+  updateProcessingItemProgress: (id, progress) =>
+    set((state) => ({
+      processingList: state.processingList.map((item) =>
+        item.id === id ? { ...item, progress } : item,
       ),
     })),
   updateProcessingItemStatusAndOutput: (id, status, outputPath) =>
