@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next';
 
 const FileDropOverlay: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
-  const { setCurrentFile, addMultipleToProcessingList } = useAppStore();
+  const { setCurrentFile, addMultipleToProcessingListWithCheck } =
+    useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -34,8 +35,8 @@ const FileDropOverlay: React.FC = () => {
         setCurrentFile(mp4Files[0]);
       }
 
-      // 批量添加到处理列表
-      addMultipleToProcessingList(mp4Files);
+      // 批量添加到处理列表（带处理状态检查）
+      addMultipleToProcessingListWithCheck(mp4Files);
 
       // 显示添加结果
       toast({
@@ -45,7 +46,7 @@ const FileDropOverlay: React.FC = () => {
         }),
       });
     },
-    [setCurrentFile, addMultipleToProcessingList, toast, t],
+    [setCurrentFile, addMultipleToProcessingListWithCheck, toast, t],
   );
 
   useEffect(() => {

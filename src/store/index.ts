@@ -47,6 +47,7 @@ interface AppState {
   setShowProcessingList: (show: boolean) => void;
   addToProcessingList: (file: string) => void;
   addMultipleToProcessingList: (files: string[]) => void;
+  addMultipleToProcessingListWithCheck: (files: string[]) => void;
   removeFromProcessingList: (id: string) => void;
   clearProcessingList: () => void;
   updateProcessingItemStatus: (
@@ -150,7 +151,7 @@ export const useAppStore = create<AppState>((set) => ({
         processingList: [...state.processingList, newItem],
       };
     }),
-  addMultipleToProcessingList: (filePaths) =>
+  addMultipleToProcessingList: (filePaths: string[]) =>
     set((state) => {
       const newItems: ProcessingItem[] = [];
 
@@ -172,6 +173,44 @@ export const useAppStore = create<AppState>((set) => ({
         };
 
         newItems.push(newItem);
+      }
+
+      return {
+        processingList: [...state.processingList, ...newItems],
+      };
+    }),
+  // 异步添加多个文件到处理列表（带处理状态检查）
+  addMultipleToProcessingListWithCheck: (filePaths: string[]) =>
+    set((state) => {
+      const newItems: ProcessingItem[] = [];
+
+      for (const filePath of filePaths) {
+        // 检查是否已存在
+        const exists = state.processingList.some(
+          (item) => item.filePath === filePath,
+        );
+        if (exists) continue;
+
+        // 提取文件名
+        const fileName = filePath.split('/').pop() || filePath;
+
+        // 创建处理项
+        const newItem: ProcessingItem = {
+          id: `${Date.now()}-${Math.random()}`,
+          filePath,
+          fileName: fileName || '',
+          status: 'pending', // 默认状态为待处理
+        };
+
+        newItems.push(newItem);
+
+        // 异步检查文件是否已处理
+        state.checkIfFileProcessed(filePath).then((isProcessed) => {
+          if (isProcessed) {
+            // 如果已处理，更新状态为已完成
+            state.updateProcessingItemStatus(newItem.id, 'completed');
+          }
+        });
       }
 
       return {
