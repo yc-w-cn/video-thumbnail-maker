@@ -179,7 +179,7 @@ pub async fn process_video_gif(
     path: String,
     thumbnails: u32,
     width: u32,
-    _fps: u32, // 未使用但保留参数以保持API一致性
+    fps: u32,
     delay: u32,
     loop_count: u32,
     output: String,
