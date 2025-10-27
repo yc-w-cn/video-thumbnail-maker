@@ -47,7 +47,7 @@ const resources = {
         },
       },
       actions: {
-        process: 'Generate Thumbnails',
+        process: 'Generate',
         dropzone: {
           title: 'Drop video files here',
           description: 'or click to select files',
@@ -137,7 +137,7 @@ const resources = {
         },
       },
       actions: {
-        process: '开始生成缩略图',
+        process: '开始生成',
         dropzone: {
           title: '将视频文件拖放到此处',
           description: '或点击选择文件',
