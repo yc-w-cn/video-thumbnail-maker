@@ -40,7 +40,7 @@ const VideoSettings: React.FC = () => {
               id="generateThumbnail"
               checked={generateThumbnail}
               onCheckedChange={handleGenerateThumbnailChange}
-              className="mr-2"
+              className="mr-2 dark:bg-gray-700 dark:border-gray-600 dark:data-[state=checked]:bg-primary dark:data-[state=checked]:border-primary"
             />
             <Label
               htmlFor="generateThumbnail"
@@ -54,7 +54,7 @@ const VideoSettings: React.FC = () => {
               id="generateGif"
               checked={generateGif}
               onCheckedChange={handleGenerateGifChange}
-              className="mr-2"
+              className="mr-2 dark:bg-gray-700 dark:border-gray-600 dark:data-[state=checked]:bg-primary dark:data-[state=checked]:border-primary"
             />
             <Label
               htmlFor="generateGif"

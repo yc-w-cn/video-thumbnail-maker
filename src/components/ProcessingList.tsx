@@ -8,6 +8,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { dirname } from '@tauri-apps/api/path';
 import { useToast } from '../hooks/use-toast';
 import { listen } from '@tauri-apps/api/event';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 
 const ProcessingList: React.FC = () => {
   const {
@@ -315,16 +317,18 @@ const ProcessingList: React.FC = () => {
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
                 {/* 跳过已处理文件选项 */}
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="skipProcessed"
                     checked={skipProcessed}
-                    onChange={toggleSkipProcessed}
-                    className="mr-2"
+                    onCheckedChange={toggleSkipProcessed}
+                    className="mr-2 dark:bg-gray-700 dark:border-gray-600 dark:data-[state=checked]:bg-primary dark:data-[state=checked]:border-primary"
                   />
-                  <label htmlFor="skipProcessed" className="text-sm">
+                  <Label
+                    htmlFor="skipProcessed"
+                    className="text-sm dark:text-gray-200"
+                  >
                     {t('processingList.skip')}
-                  </label>
+                  </Label>
                 </div>
 
                 <div className="flex gap-2">
