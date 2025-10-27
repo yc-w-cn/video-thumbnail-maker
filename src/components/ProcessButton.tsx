@@ -39,6 +39,8 @@ const ProcessButton = () => {
     setPaused(false);
     setProgress(0);
 
+    // 获取文件名用于提示
+    const fileName = filePath.split('/').pop() || filePath;
     try {
       await invoke('process_video', {
         path: filePath,
@@ -50,7 +52,7 @@ const ProcessButton = () => {
 
       toast({
         title: t('status.complete'),
-        description: t('status.ready'),
+        description: `${t('status.ready')}: ${fileName}`,
       });
 
       return true;
@@ -58,7 +60,7 @@ const ProcessButton = () => {
       console.error(error);
       toast({
         title: t('status.error'),
-        description: String(error),
+        description: `${fileName}: ${String(error)}`,
         variant: 'destructive',
       });
 
@@ -66,6 +68,7 @@ const ProcessButton = () => {
     } finally {
       setProcessing(false);
       setProgress(0);
+      setCurrentFile(null);
     }
   };
 
@@ -86,10 +89,7 @@ const ProcessButton = () => {
               return;
             }
 
-            const success = await processSingleFile(processState.currentFile);
-            if (success) {
-              setCurrentFile(null);
-            }
+            await processSingleFile(processState.currentFile);
           }}
         >
           {processState.isProcessing ? (
