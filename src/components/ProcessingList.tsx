@@ -224,7 +224,7 @@ const ProcessingList: React.FC = () => {
 
                 <div className="flex gap-2">
                   <Button
-                    className="flex-1"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                     size="sm"
                     disabled={
                       processState.isProcessing || processingList.length === 0
@@ -237,6 +237,7 @@ const ProcessingList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:disabled:border-slate-700"
                     onClick={togglePause}
                     disabled={!processState.isProcessing}
                   >
@@ -257,7 +258,7 @@ const ProcessingList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800 dark:text-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:disabled:border-slate-700 cursor-pointer"
                     onClick={clearCompletedItems}
                     disabled={processState.isProcessing || completedCount === 0}
                   >
@@ -266,7 +267,7 @@ const ProcessingList: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800 dark:text-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:disabled:border-slate-700 cursor-pointer"
                     onClick={clearProcessingList}
                     disabled={processState.isProcessing}
                   >
