@@ -166,17 +166,8 @@ const ProcessingList: React.FC = () => {
       );
     }
 
-    // 根据生成模式处理文件
-    const generateThumbnail = settings.generateThumbnail;
-    const generateGif = settings.generateGif;
-
-    // 如果两种模式都没有选择，则不处理
-    if (!generateThumbnail && !generateGif) {
-      toast({
-        title: t('status.error'),
-        description: t('processingList.noModeSelected'),
-        variant: 'destructive',
-      });
+    // 检查是否有文件需要处理
+    if (filesToProcess.length === 0) {
       return;
     }
 
@@ -193,8 +184,8 @@ const ProcessingList: React.FC = () => {
 
       let success = true;
 
-      // 处理缩略图（如果选择了生成缩略图）
-      if (generateThumbnail) {
+      // 根据文件记录的生成模式处理
+      if (item.generateMode === 'both' || item.generateMode === 'thumbnail') {
         const thumbnailSuccess = await processSingleFile(
           item.id,
           item.filePath,
@@ -203,8 +194,7 @@ const ProcessingList: React.FC = () => {
         success = success && thumbnailSuccess;
       }
 
-      // 处理GIF动画（如果选择了生成GIF）
-      if (generateGif) {
+      if (item.generateMode === 'both' || item.generateMode === 'gif') {
         const gifSuccess = await processSingleFile(
           item.id,
           item.filePath,
@@ -219,21 +209,9 @@ const ProcessingList: React.FC = () => {
   }, [
     processingList,
     skipProcessed,
-    settings.generateThumbnail,
-    settings.generateGif,
-    settings.thumbnails,
-    settings.width,
-    settings.cols,
-    settings.gifFPS,
-    settings.gifDelay,
-    settings.gifLoop,
-    settings.useVideoDir,
-    settings.output,
     processState.isPaused,
     updateProcessingItemStatus,
     processSingleFile,
-    toast,
-    t,
   ]);
 
   // 切换跳过已处理文件选项
@@ -306,7 +284,13 @@ const ProcessingList: React.FC = () => {
                         fileName={item.fileName}
                         status={item.status}
                         progress={item.progress}
-                        processType={item.processType}
+                        processType={
+                          item.generateMode === 'gif'
+                            ? 'gif'
+                            : item.generateMode === 'thumbnail'
+                              ? 'thumbnail'
+                              : undefined
+                        }
                       />
                     ))}
                   </ul>

@@ -166,6 +166,13 @@ export const useAppStore = create<AppState>((set) => ({
         filePath,
         fileName: fileName || '',
         status: 'pending',
+        // 添加生成模式信息
+        generateMode:
+          state.settings.generateThumbnail && state.settings.generateGif
+            ? 'both'
+            : state.settings.generateThumbnail
+              ? 'thumbnail'
+              : 'gif',
       };
 
       return {
@@ -191,6 +198,13 @@ export const useAppStore = create<AppState>((set) => ({
           filePath,
           fileName: fileName || '',
           status: 'pending',
+          // 添加生成模式信息
+          generateMode:
+            state.settings.generateThumbnail && state.settings.generateGif
+              ? 'both'
+              : state.settings.generateThumbnail
+                ? 'thumbnail'
+                : 'gif',
         };
 
         newItems.push(newItem);
@@ -221,6 +235,13 @@ export const useAppStore = create<AppState>((set) => ({
           filePath,
           fileName: fileName || '',
           status: 'pending', // 默认状态为待处理
+          // 添加生成模式信息
+          generateMode:
+            state.settings.generateThumbnail && state.settings.generateGif
+              ? 'both'
+              : state.settings.generateThumbnail
+                ? 'thumbnail'
+                : 'gif',
         };
 
         newItems.push(newItem);

@@ -42,6 +42,10 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
     if (processType) {
       return `${baseText} (${processType === 'gif' ? t('settings.video.generateModeGif') : t('settings.video.generateModeThumbnail')})`;
     }
+    // 如果没有指定处理类型，根据状态显示通用文本
+    if (status === 'completed') {
+      return `${baseText} (${t('settings.video.generateModeThumbnail')})`;
+    }
     return baseText;
   };
 
