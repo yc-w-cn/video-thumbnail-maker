@@ -75,7 +75,7 @@ const ProcessButton = () => {
         <Button
           variant="default"
           size="lg"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+          className="w-full text-white dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
           disabled={processState.isProcessing}
           onClick={async () => {
             if (!processState.currentFile) {

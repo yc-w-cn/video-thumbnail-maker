@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../store';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +27,33 @@ const ProcessingList: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [skipProcessed, setSkipProcessed] = useState(true);
+
+  // 添加动画状态
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // 当showProcessingList变化时触发动画
+  useEffect(() => {
+    if (showProcessingList) {
+      // 延迟设置isVisible以触发进入动画
+      setTimeout(() => {
+        setIsVisible(true);
+      }, 10);
+    } else {
+      setIsVisible(false);
+    }
+  }, [showProcessingList]);
+
+  // 处理关闭侧边栏
+  const handleClose = useCallback(() => {
+    setIsAnimating(true);
+    setIsVisible(false);
+    setTimeout(() => {
+      setShowProcessingList(false);
+      setIsAnimating(false);
+    }, 300); // 与CSS动画持续时间保持一致
+  }, [setShowProcessingList]);
 
   // 计算统计数据
   const completedCount = processingList.filter(
@@ -156,10 +183,17 @@ const ProcessingList: React.FC = () => {
         <>
           {/* 添加遮罩层 */}
           <div
-            className="fixed inset-0 bg-black opacity-80 z-30"
-            onClick={() => setShowProcessingList(false)}
+            className={`fixed inset-0 bg-black z-30 transition-opacity duration-300 ease-in-out ${
+              isVisible && !isAnimating ? 'opacity-80' : 'opacity-0'
+            }`}
+            onClick={handleClose}
           />
-          <div className="fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out">
+          <div
+            ref={sidebarRef}
+            className={`fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out ${
+              isVisible && !isAnimating ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -176,7 +210,7 @@ const ProcessingList: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowProcessingList(false)}
+                  onClick={handleClose}
                   className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="h-4 w-4" />
@@ -224,7 +258,7 @@ const ProcessingList: React.FC = () => {
 
                 <div className="flex gap-2">
                   <Button
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
+                    className="flex-1 text-white dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                     size="sm"
                     disabled={
                       processState.isProcessing || processingList.length === 0
