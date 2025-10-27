@@ -30,7 +30,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+      className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
       title={t(isDark ? 'theme.toggle.light' : 'theme.toggle.dark')}
     >
       {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

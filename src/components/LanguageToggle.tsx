@@ -29,7 +29,7 @@ export function LanguageToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="cursor-pointer rounded-full"
+          className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
           title={t('language.toggle')}
         >
           {i18n.language === 'zh' ? '中' : 'En'}

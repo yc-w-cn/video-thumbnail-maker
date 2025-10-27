@@ -177,6 +177,7 @@ const ProcessingList: React.FC = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowProcessingList(false)}
+                  className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="h-4 w-4" />
                 </Button>

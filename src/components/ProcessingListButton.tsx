@@ -18,7 +18,7 @@ const ProcessingListButton: React.FC = () => {
       variant="ghost"
       size="icon"
       onClick={handleClick}
-      className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+      className="cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
       title={t('processingList.toggle')}
     >
       <List className="h-5 w-5" />
