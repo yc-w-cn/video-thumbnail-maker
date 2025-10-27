@@ -42,17 +42,40 @@ const ProcessButton = () => {
     // 获取文件名用于提示
     const fileName = filePath.split('/').pop() || filePath;
     try {
-      await invoke('process_video', {
-        path: filePath,
-        thumbnails: settings.thumbnails,
-        width: settings.width,
-        cols: settings.cols,
-        output,
-      });
+      // 根据生成模式调用不同的Rust命令
+      if (settings.generateGif && !settings.generateThumbnail) {
+        // 只生成GIF动画
+        await invoke('process_video_gif', {
+          path: filePath,
+          thumbnails: settings.thumbnails,
+          width: settings.width,
+          fps: settings.gifFPS,
+          delay: settings.gifDelay,
+          loop: settings.gifLoop,
+          output,
+        });
+      } else {
+        // 生成缩略图（默认或同时生成两种）
+        await invoke('process_video', {
+          path: filePath,
+          thumbnails: settings.thumbnails,
+          width: settings.width,
+          cols: settings.cols,
+          output,
+        });
+      }
+
+      // 根据生成模式显示不同的完成提示
+      let description = `${t('status.ready')}: ${fileName}`;
+      if (settings.generateGif && !settings.generateThumbnail) {
+        description += ` (${t('settings.video.generateModeGif')})`;
+      } else if (settings.generateThumbnail && !settings.generateGif) {
+        description += ` (${t('settings.video.generateModeThumbnail')})`;
+      }
 
       toast({
         title: t('status.complete'),
-        description: `${t('status.ready')}: ${fileName}`,
+        description,
       });
 
       return true;
