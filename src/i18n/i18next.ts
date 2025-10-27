@@ -34,8 +34,16 @@ const resources = {
           quality: 'Quality',
           width: 'Width',
           height: 'Height',
-          thumbnails: 'Number of Thumbnails',
+          thumbnails: 'Number of Screenshots',
           cols: 'Columns per Row',
+          // 添加生成模式相关翻译
+          generateMode: 'Generation Mode',
+          generateModeThumbnail: 'Thumbnails',
+          generateModeGif: 'Thumbnail Animation',
+          // 添加GIF动画配置相关翻译
+          gifFPS: 'Animation FPS',
+          gifDelay: 'Animation Delay (1/100 sec)',
+          gifLoop: 'Animation Loop (0 = infinite)',
         },
       },
       actions: {
@@ -80,6 +88,7 @@ const resources = {
           completed: 'Completed',
           error: 'Error',
         },
+        noModeSelected: 'Please select at least one generation mode',
       },
     },
   },
@@ -117,6 +126,14 @@ const resources = {
           height: '高度',
           thumbnails: '截图数量',
           cols: '每行数量',
+          // 添加生成模式相关翻译
+          generateMode: '生成模式',
+          generateModeThumbnail: '缩略图',
+          generateModeGif: '缩略图动画',
+          // 添加GIF动画配置相关翻译
+          gifFPS: '动画帧率',
+          gifDelay: '动画延迟(1/100秒)',
+          gifLoop: '动画循环(0=无限)',
         },
       },
       actions: {
@@ -161,6 +178,7 @@ const resources = {
           completed: '已完成',
           error: '错误',
         },
+        noModeSelected: '请至少选择一种生成模式',
       },
     },
   },

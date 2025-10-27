@@ -10,6 +10,7 @@ interface ProcessingListItemProps {
   fileName: string;
   status: 'pending' | 'processing' | 'completed' | 'error';
   progress?: number; // 添加进度属性
+  processType?: 'thumbnail' | 'gif'; // 添加处理类型属性
 }
 
 const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
@@ -17,6 +18,7 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
   fileName,
   status,
   progress = 0, // 默认进度为0
+  processType,
 }) => {
   const { removeFromProcessingList } = useAppStore();
   const { t } = useTranslation();
@@ -35,7 +37,12 @@ const ProcessingListItem: React.FC<ProcessingListItemProps> = ({
   };
 
   const getStatusText = () => {
-    return t(`processingList.status.${status}`);
+    // 根据处理类型返回不同的状态文本
+    const baseText = t(`processingList.status.${status}`);
+    if (processType) {
+      return `${baseText} (${processType === 'gif' ? t('settings.video.generateModeGif') : t('settings.video.generateModeThumbnail')})`;
+    }
+    return baseText;
   };
 
   // 检查是否为已处理文件

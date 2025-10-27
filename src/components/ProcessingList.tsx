@@ -66,9 +66,13 @@ const ProcessingList: React.FC = () => {
     setPaused(!processState.isPaused);
   }, [processState.isPaused, setPaused]);
 
-  // 处理单个文件
+  // 处理单个文件 - 修改为支持不同生成模式
   const processSingleFile = useCallback(
-    async (itemId: string, filePath: string) => {
+    async (
+      itemId: string,
+      filePath: string,
+      processType: 'thumbnail' | 'gif' = 'thumbnail',
+    ) => {
       const output = settings.useVideoDir
         ? await dirname(filePath)
         : settings.output;
@@ -89,20 +93,37 @@ const ProcessingList: React.FC = () => {
           updateProcessingItemProgress(itemId, progress);
         });
 
-        await invoke('process_video', {
-          path: filePath,
-          thumbnails: settings.thumbnails,
-          width: settings.width,
-          cols: settings.cols,
-          output,
-        });
+        // 根据处理类型调用不同的Rust命令
+        if (processType === 'gif') {
+          await invoke('process_video_gif', {
+            path: filePath,
+            thumbnails: settings.thumbnails,
+            width: settings.width,
+            fps: settings.gifFPS,
+            delay: settings.gifDelay,
+            loop: settings.gifLoop,
+            output,
+          });
+        } else {
+          await invoke('process_video', {
+            path: filePath,
+            thumbnails: settings.thumbnails,
+            width: settings.width,
+            cols: settings.cols,
+            output,
+          });
+        }
 
         // 处理完成后取消监听
         unlisten();
 
         toast({
           title: t('status.complete'),
-          description: `${t('status.ready')}: ${fileName}`,
+          description: `${t('status.ready')}: ${fileName} (${
+            processType === 'gif'
+              ? t('settings.video.generateModeGif')
+              : t('settings.video.generateModeThumbnail')
+          })`,
         });
 
         return true;
@@ -131,17 +152,35 @@ const ProcessingList: React.FC = () => {
     ],
   );
 
-  // 处理所有文件
+  // 处理所有文件 - 修改为支持不同生成模式
   const processAllFiles = useCallback(async () => {
-    // 过滤出需要处理的文件
-    const filesToProcess = skipProcessed
-      ? processingList.filter((item) => item.status !== 'completed')
-      : processingList;
+    // 根据生成模式确定需要处理的文件列表
+    let filesToProcess = [...processingList];
+
+    // 如果跳过已处理文件，过滤掉已完成的文件
+    if (skipProcessed) {
+      filesToProcess = filesToProcess.filter(
+        (item) => item.status !== 'completed',
+      );
+    }
+
+    // 根据生成模式处理文件
+    const generateThumbnail = settings.generateThumbnail;
+    const generateGif = settings.generateGif;
+
+    // 如果两种模式都没有选择，则不处理
+    if (!generateThumbnail && !generateGif) {
+      toast({
+        title: t('status.error'),
+        description: t('processingList.noModeSelected'),
+        variant: 'destructive',
+      });
+      return;
+    }
 
     for (const item of filesToProcess) {
       // 如果已暂停，等待恢复
       if (processState.isPaused) {
-        // 等待恢复的逻辑
         while (processState.isPaused) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
@@ -150,8 +189,27 @@ const ProcessingList: React.FC = () => {
       // 更新状态为处理中
       updateProcessingItemStatus(item.id, 'processing');
 
-      // 处理文件（传递处理项ID以便更新进度）
-      const success = await processSingleFile(item.id, item.filePath);
+      let success = true;
+
+      // 处理缩略图（如果选择了生成缩略图）
+      if (generateThumbnail) {
+        const thumbnailSuccess = await processSingleFile(
+          item.id,
+          item.filePath,
+          'thumbnail',
+        );
+        success = success && thumbnailSuccess;
+      }
+
+      // 处理GIF动画（如果选择了生成GIF）
+      if (generateGif) {
+        const gifSuccess = await processSingleFile(
+          item.id,
+          item.filePath,
+          'gif',
+        );
+        success = success && gifSuccess;
+      }
 
       // 更新状态
       updateProcessingItemStatus(item.id, success ? 'completed' : 'error');
@@ -159,9 +217,21 @@ const ProcessingList: React.FC = () => {
   }, [
     processingList,
     skipProcessed,
+    settings.generateThumbnail,
+    settings.generateGif,
+    settings.thumbnails,
+    settings.width,
+    settings.cols,
+    settings.gifFPS,
+    settings.gifDelay,
+    settings.gifLoop,
+    settings.useVideoDir,
+    settings.output,
     processState.isPaused,
     updateProcessingItemStatus,
     processSingleFile,
+    toast,
+    t,
   ]);
 
   // 切换跳过已处理文件选项
@@ -234,6 +304,7 @@ const ProcessingList: React.FC = () => {
                         fileName={item.fileName}
                         status={item.status}
                         progress={item.progress}
+                        processType={item.processType}
                       />
                     ))}
                   </ul>

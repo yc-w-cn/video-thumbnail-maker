@@ -12,6 +12,13 @@ interface Settings {
   output: string;
   cols: number;
   useVideoDir: boolean;
+  // 修改生成模式配置为多选
+  generateThumbnail: boolean;
+  generateGif: boolean;
+  // 添加GIF动画配置
+  gifFPS: number;
+  gifLoop: number;
+  gifDelay: number;
 }
 
 interface ProcessState {
@@ -29,6 +36,10 @@ interface ProcessingItem {
   status: 'pending' | 'processing' | 'completed' | 'error';
   progress?: number; // 添加进度字段
   outputPath?: string;
+  // 添加生成模式标识
+  generateMode?: 'thumbnail' | 'gif' | 'both';
+  // 添加处理类型标识
+  processType?: 'thumbnail' | 'gif';
 }
 
 interface AppState {
@@ -95,6 +106,13 @@ export const useAppStore = create<AppState>((set) => ({
     output: '~/Pictures',
     cols: 5,
     useVideoDir: true,
+    // 修改生成模式默认值
+    generateThumbnail: true,
+    generateGif: false,
+    // 添加GIF动画配置默认值
+    gifFPS: 10,
+    gifLoop: 0, // 0表示无限循环
+    gifDelay: 10, // 延迟时间（1/100秒为单位）
     ...loadSettingsFromStorage(),
   },
   processState: {

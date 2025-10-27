@@ -176,6 +176,101 @@ async fn process_video(
     Ok(())
 }
 
+// 新增：处理视频生成GIF动画
+#[tauri::command]
+async fn process_video_gif(
+    app: AppHandle,
+    path: String,
+    thumbnails: u32,
+    width: u32,
+    fps: u32,
+    delay: u32,
+    loop_count: u32,
+    output: String,
+) -> Result<(), String> {
+    let output_path = std::path::Path::new(&output);
+
+    // 创建临时目录
+    let temp_dir = tempfile::tempdir().map_err(|e| e.to_string())?;
+
+    // 计算截图间隔
+    let duration = get_video_duration(&path)?;
+    let interval = duration / thumbnails as f64;
+
+    // 使用 ffmpeg_sidecar 创建命令来提取帧
+    let mut cmd = FfmpegCommand::new();
+    cmd.input(&path)
+        .args(&["-loglevel", "info"]) // 确保输出包含进度信息
+        .args(&["-vf", &format!("scale={}:-1,fps=1/{}", width, interval)])
+        .args(&["-vframes", &thumbnails.to_string()])
+        .output(&format!("{}/frame_%03d.jpg", temp_dir.path().display()));
+
+    app.emit("progress-update", Some(0.0))
+        .map_err(|e| e.to_string())?;
+
+    cmd.spawn()
+        .map_err(|e| e.to_string())?
+        .iter()
+        .map_err(|e| e.to_string())?
+        .for_each(|event| {
+            match event {
+                FfmpegEvent::Progress(_) => {
+                    // 由于Progress事件未收到，这里不再处理
+                }
+                FfmpegEvent::Log(_, msg) => {
+                    eprintln!("[ffmpeg] {}", msg);
+                    // 解析日志中的frame信息
+                    // 预编译正则表达式，避免重复创建
+                    let re = Regex::new(r"frame=\s*(\d+)").unwrap();
+
+                    if msg.contains("frame=") {
+                        if let Some(caps) = re.captures(&msg) {
+                            if let Some(frame_match) = caps.get(1) {
+                                let frame_str = frame_match.as_str();
+                                if let Ok(frame) = frame_str.parse::<u32>() {
+                                    let progress =
+                                        (frame as f32 / thumbnails as f32 * 99.0).min(99.0); // 确保不超过99%
+                                    eprintln!(
+                                        "[ffmpeg] 解析到帧数: {}, 计算进度: {}%",
+                                        frame, progress
+                                    );
+                                    let _ = app.emit("progress-update", Some(progress));
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        });
+
+    app.emit("progress-update", Some(99.0))
+        .map_err(|e| e.to_string())?;
+
+    // 从输入路径中提取文件名并更改扩展名为.gif
+    let input_filename = std::path::Path::new(&path)
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or("output");
+    let output_filename = format!("{}_animation.gif", input_filename);
+    let output_file_path = output_path.join(output_filename);
+
+    // 生成 ImageMagick 命令来创建GIF动画
+    let convert_cmd = format!(
+        "convert -delay {} -loop {} {}/*.jpg {:?}",
+        delay,
+        loop_count,
+        temp_dir.path().display(),
+        output_file_path
+    );
+
+    execute_command(&convert_cmd)?;
+    app.emit("progress-update", Some(100.0))
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn get_video_duration(path: &str) -> Result<f64, String> {
     let output = std::process::Command::new("ffprobe")
         .args(&[
@@ -213,9 +308,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             process_video, 
+            process_video_gif, // 添加新的GIF处理命令
             check_dependencies,
             check_file_processed,
-            scan_folder_for_videos  // 添加新的命令
+            scan_folder_for_videos
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
