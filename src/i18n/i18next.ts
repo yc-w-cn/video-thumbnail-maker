@@ -72,6 +72,7 @@ const resources = {
         start: 'Start Processing',
         pause: 'Pause',
         clear: 'Clear List',
+        clearCompleted: 'Clear Completed',
         skip: 'Skip processed files',
         status: {
           pending: 'Pending',
@@ -152,6 +153,7 @@ const resources = {
         start: '开始处理',
         pause: '暂停',
         clear: '清空列表',
+        clearCompleted: '清空已完成',
         skip: '跳过已处理文件',
         status: {
           pending: '待处理',

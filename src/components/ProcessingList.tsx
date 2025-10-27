@@ -22,10 +22,17 @@ const ProcessingList: React.FC = () => {
     setProcessing,
     setProgress,
     updateProcessingItemProgress,
+    setProcessingList,
   } = useAppStore();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [skipProcessed, setSkipProcessed] = useState(true);
+
+  // 计算统计数据
+  const completedCount = processingList.filter(
+    (item) => item.status === 'completed',
+  ).length;
+  const totalCount = processingList.length;
 
   // 使用useCallback包装togglePause函数，避免不必要的重新渲染
   const togglePause = useCallback(() => {
@@ -42,6 +49,9 @@ const ProcessingList: React.FC = () => {
       setProcessing(true);
       setPaused(false);
       setProgress(0);
+
+      // 获取文件名用于提示
+      const fileName = filePath.split('/').pop() || filePath;
 
       try {
         // 监听进度更新事件
@@ -65,7 +75,7 @@ const ProcessingList: React.FC = () => {
 
         toast({
           title: t('status.complete'),
-          description: t('status.ready'),
+          description: `${t('status.ready')}: ${fileName}`,
         });
 
         return true;
@@ -73,7 +83,7 @@ const ProcessingList: React.FC = () => {
         console.error(error);
         toast({
           title: t('status.error'),
-          description: String(error),
+          description: `${fileName}: ${String(error)}`,
           variant: 'destructive',
         });
 
@@ -132,106 +142,140 @@ const ProcessingList: React.FC = () => {
     setSkipProcessed(!skipProcessed);
   }, [skipProcessed]);
 
+  // 清空已完成项
+  const clearCompletedItems = useCallback(() => {
+    setProcessingList(
+      processingList.filter((item) => item.status !== 'completed'),
+    );
+  }, [processingList, setProcessingList]);
+
   // 不要在这里提前返回，确保Hook调用的一致性
   return (
     <>
       {showProcessingList && (
-        <div className="fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out">
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold">
-                {t('processingList.title')}
-              </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowProcessingList(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {processingList.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                  {t('processingList.empty')}
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {processingList.map((item) => (
-                    <ProcessingListItem
-                      key={item.id}
-                      id={item.id}
-                      fileName={item.fileName}
-                      status={item.status}
-                      progress={item.progress}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-              {/* 跳过已处理文件选项 */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="skipProcessed"
-                  checked={skipProcessed}
-                  onChange={toggleSkipProcessed}
-                  className="mr-2"
-                />
-                <label htmlFor="skipProcessed" className="text-sm">
-                  {t('processingList.skip')}
-                </label>
-              </div>
-
-              <div className="flex gap-2">
+        <>
+          {/* 添加遮罩层 */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={() => setShowProcessingList(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    {t('processingList.title')}
+                  </h2>
+                  {/* 显示统计信息 */}
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {completedCount} {' / '} {totalCount}{' '}
+                    {t('processingList.status.completed')}
+                  </p>
+                </div>
                 <Button
-                  className="flex-1"
-                  size="sm"
-                  disabled={
-                    processState.isProcessing || processingList.length === 0
-                  }
-                  onClick={processAllFiles}
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowProcessingList(false)}
                 >
-                  <Play className="h-4 w-4 mr-1" />
-                  {t('processingList.start')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={togglePause}
-                  disabled={!processState.isProcessing}
-                >
-                  {processState.isPaused ? (
-                    <>
-                      <Play className="h-4 w-4 mr-1" />
-                      {t('processingList.start')}
-                    </>
-                  ) : (
-                    <>
-                      <Pause className="h-4 w-4 mr-1" />
-                      {t('processingList.pause')}
-                    </>
-                  )}
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={clearProcessingList}
-                disabled={processState.isProcessing}
-              >
-                {t('processingList.clear')}
-              </Button>
+
+              {/* List */}
+              <div className="flex-1 overflow-y-auto p-4">
+                {processingList.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-gray-500 dark:text-gray-400 text-center">
+                      {t('processingList.empty')}
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="space-y-2">
+                    {processingList.map((item) => (
+                      <ProcessingListItem
+                        key={item.id}
+                        id={item.id}
+                        fileName={item.fileName}
+                        status={item.status}
+                        progress={item.progress}
+                      />
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                {/* 跳过已处理文件选项 */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="skipProcessed"
+                    checked={skipProcessed}
+                    onChange={toggleSkipProcessed}
+                    className="mr-2"
+                  />
+                  <label htmlFor="skipProcessed" className="text-sm">
+                    {t('processingList.skip')}
+                  </label>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    size="sm"
+                    disabled={
+                      processState.isProcessing || processingList.length === 0
+                    }
+                    onClick={processAllFiles}
+                  >
+                    <Play className="h-4 w-4 mr-1" />
+                    {t('processingList.start')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={togglePause}
+                    disabled={!processState.isProcessing}
+                  >
+                    {processState.isPaused ? (
+                      <>
+                        <Play className="h-4 w-4 mr-1" />
+                        {t('processingList.start')}
+                      </>
+                    ) : (
+                      <>
+                        <Pause className="h-4 w-4 mr-1" />
+                        {t('processingList.pause')}
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={clearCompletedItems}
+                    disabled={processState.isProcessing || completedCount === 0}
+                  >
+                    {t('processingList.clearCompleted')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={clearProcessingList}
+                    disabled={processState.isProcessing}
+                  >
+                    {t('processingList.clear')}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
