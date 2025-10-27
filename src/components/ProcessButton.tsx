@@ -43,7 +43,7 @@ const ProcessButton = () => {
     const fileName = filePath.split('/').pop() || filePath;
     try {
       // 根据生成模式调用不同的Rust命令
-      if (settings.generateGif && !settings.generateThumbnail) {
+      if (settings.generateGif) {
         // 只生成GIF动画
         await invoke('process_video_gif', {
           path: filePath,
@@ -51,11 +51,13 @@ const ProcessButton = () => {
           width: settings.width,
           fps: settings.gifFPS,
           delay: settings.gifDelay,
-          loop: settings.gifLoop,
+          loopCount: settings.gifLoop, // 修正参数名称为 loopCount
           output,
         });
-      } else {
-        // 生成缩略图（默认或同时生成两种）
+      }
+
+      if (settings.generateThumbnail) {
+        // 生成缩略图
         await invoke('process_video', {
           path: filePath,
           thumbnails: settings.thumbnails,
