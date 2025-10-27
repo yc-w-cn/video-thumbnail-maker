@@ -67,120 +67,104 @@ const VideoSettings: React.FC = () => {
       </div>
 
       {/* 缩略图相关选项 - 仅在选中缩略图时显示 */}
-      {generateThumbnail && (
-        <>
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="thumbnails"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.thumbnails')}
-            </Label>
-            <Input
-              id="thumbnails"
-              type="number"
-              value={settings.thumbnails}
-              onChange={(e) =>
-                updateSettings({ thumbnails: Number(e.target.value) })
-              }
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="thumbnails"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.thumbnails')}
+        </Label>
+        <Input
+          id="thumbnails"
+          type="number"
+          value={settings.thumbnails}
+          onChange={(e) =>
+            updateSettings({ thumbnails: Number(e.target.value) })
+          }
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="width"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.width')}
-            </Label>
-            <Input
-              id="width"
-              type="number"
-              value={settings.width}
-              onChange={(e) =>
-                updateSettings({ width: Number(e.target.value) })
-              }
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="width"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.width')}
+        </Label>
+        <Input
+          id="width"
+          type="number"
+          value={settings.width}
+          onChange={(e) => updateSettings({ width: Number(e.target.value) })}
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="cols"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.cols')}
-            </Label>
-            <Input
-              id="cols"
-              type="number"
-              value={settings.cols}
-              onChange={(e) => updateSettings({ cols: Number(e.target.value) })}
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
-        </>
-      )}
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="cols"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.cols')}
+        </Label>
+        <Input
+          id="cols"
+          type="number"
+          value={settings.cols}
+          onChange={(e) => updateSettings({ cols: Number(e.target.value) })}
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
       {/* GIF动画配置选项 - 仅在选中GIF时显示 */}
-      {generateGif && (
-        <>
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="gifFPS"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.gifFPS')}
-            </Label>
-            <Input
-              id="gifFPS"
-              type="number"
-              value={settings.gifFPS}
-              onChange={(e) =>
-                updateSettings({ gifFPS: Number(e.target.value) })
-              }
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="gifFPS"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.gifFPS')}
+        </Label>
+        <Input
+          id="gifFPS"
+          type="number"
+          value={settings.gifFPS}
+          onChange={(e) => updateSettings({ gifFPS: Number(e.target.value) })}
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="gifDelay"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.gifDelay')}
-            </Label>
-            <Input
-              id="gifDelay"
-              type="number"
-              value={settings.gifDelay}
-              onChange={(e) =>
-                updateSettings({ gifDelay: Number(e.target.value) })
-              }
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="gifDelay"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.gifDelay')}
+        </Label>
+        <Input
+          id="gifDelay"
+          type="number"
+          value={settings.gifDelay}
+          onChange={(e) => updateSettings({ gifDelay: Number(e.target.value) })}
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
-          <div className="flex flex-col space-y-2">
-            <Label
-              htmlFor="gifLoop"
-              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-            >
-              {t('settings.video.gifLoop')}
-            </Label>
-            <Input
-              id="gifLoop"
-              type="number"
-              value={settings.gifLoop}
-              onChange={(e) =>
-                updateSettings({ gifLoop: Number(e.target.value) })
-              }
-              className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
-            />
-          </div>
-        </>
-      )}
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="gifLoop"
+          className="text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
+          {t('settings.video.gifLoop')}
+        </Label>
+        <Input
+          id="gifLoop"
+          type="number"
+          value={settings.gifLoop}
+          onChange={(e) => updateSettings({ gifLoop: Number(e.target.value) })}
+          className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-none"
+        />
+      </div>
 
       <OutputLocation />
     </div>
