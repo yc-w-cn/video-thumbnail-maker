@@ -51,7 +51,7 @@ const resources = {
         dropzone: {
           title: 'Drop video files here',
           description: 'or click to select files',
-          mp4_only: 'Only MP4, WMV, and MKV files are supported',
+          mp4_only: 'MP4, WMV, and MKV files are supported',
           added_files: '{{count}} files added to processing list',
         },
       },
@@ -141,7 +141,7 @@ const resources = {
         dropzone: {
           title: '将视频文件拖放到此处',
           description: '或点击选择文件',
-          mp4_only: '仅支持MP4、WMV和MKV文件',
+          mp4_only: '支持MP4、WMV和MKV文件',
           added_files: '已添加{{count}}个文件到处理列表',
         },
       },
