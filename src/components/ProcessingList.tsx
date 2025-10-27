@@ -156,7 +156,7 @@ const ProcessingList: React.FC = () => {
         <>
           {/* 添加遮罩层 */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30"
+            className="fixed inset-0 bg-black opacity-80 z-30"
             onClick={() => setShowProcessingList(false)}
           />
           <div className="fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out">
