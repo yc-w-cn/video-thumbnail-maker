@@ -22,6 +22,7 @@ A simple and easy-to-use video thumbnail generator that quickly extracts multipl
 - 📊 Real-time processing progress display
 - 🌍 Bilingual interface (English/Chinese)
 - 📋 Processing list with batch operations
+- 🎞️ Support for generating thumbnail animations (GIF)
 
 ## System Requirements
 
