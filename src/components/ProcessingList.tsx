@@ -103,7 +103,7 @@ const ProcessingList: React.FC = () => {
             width: settings.width,
             fps: settings.gifFPS,
             delay: settings.gifDelay,
-            loop: settings.gifLoop,
+            loopCount: settings.gifLoop,
             output,
           });
         } else {

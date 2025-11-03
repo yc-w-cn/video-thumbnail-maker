@@ -51,7 +51,7 @@ const ProcessButton = () => {
           width: settings.width,
           fps: settings.gifFPS,
           delay: settings.gifDelay,
-          loopCount: settings.gifLoop, // 修正参数名称为 loopCount
+          loopCount: settings.gifLoop,
           output,
         });
       }
