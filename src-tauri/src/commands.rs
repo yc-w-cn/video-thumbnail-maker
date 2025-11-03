@@ -1,9 +1,9 @@
+use crate::utils::{check_command_exists, execute_command, get_video_duration};
 use ffmpeg_sidecar::{command::FfmpegCommand, event::FfmpegEvent};
 use regex::Regex;
-use tauri::{AppHandle, Emitter};
-use std::path::Path;
 use std::fs;
-use crate::utils::{check_command_exists, get_video_duration, execute_command};
+use std::path::Path;
+use tauri::{AppHandle, Emitter};
 
 // 检查依赖项
 #[tauri::command]
@@ -20,11 +20,11 @@ pub async fn check_file_processed(video_path: String) -> Result<bool, String> {
     let path = Path::new(&video_path);
     let parent = path.parent().ok_or("Invalid video path")?;
     let file_stem = path.file_stem().ok_or("Invalid video path")?;
-    
+
     // 构造缩略图文件路径
     let thumbnail_file_name = format!("{}.jpg", file_stem.to_string_lossy());
     let thumbnail_path = parent.join(thumbnail_file_name);
-    
+
     // 检查缩略图文件是否存在
     Ok(thumbnail_path.exists())
 }
@@ -33,18 +33,22 @@ pub async fn check_file_processed(video_path: String) -> Result<bool, String> {
 #[tauri::command]
 pub async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, String> {
     let mut video_files = Vec::new();
-    
+
     // 支持的视频格式
     let supported_extensions = ["mp4", "wmv", "mkv"];
-    
+
     // 递归遍历文件夹
-    fn scan_directory(dir: &Path, videos: &mut Vec<String>, extensions: &[&str]) -> Result<(), String> {
+    fn scan_directory(
+        dir: &Path,
+        videos: &mut Vec<String>,
+        extensions: &[&str],
+    ) -> Result<(), String> {
         let entries = fs::read_dir(dir).map_err(|e| e.to_string())?;
-        
+
         for entry in entries {
             let entry = entry.map_err(|e| e.to_string())?;
             let path = entry.path();
-            
+
             if path.is_file() {
                 // 检查是否为支持的视频文件
                 if let Some(extension) = path.extension() {
@@ -58,21 +62,21 @@ pub async fn scan_folder_for_videos(folder_path: String) -> Result<Vec<String>, 
                 scan_directory(&path, videos, extensions)?;
             }
         }
-        
+
         Ok(())
     }
-    
+
     let path = Path::new(&folder_path);
     if !path.exists() {
         return Err("Folder does not exist".to_string());
     }
-    
+
     if !path.is_dir() {
         return Err("Path is not a directory".to_string());
     }
-    
+
     scan_directory(&path, &mut video_files, &supported_extensions)?;
-    
+
     Ok(video_files)
 }
 
@@ -179,7 +183,6 @@ pub async fn process_video_gif(
     path: String,
     thumbnails: u32,
     width: u32,
-    fps: u32,
     delay: u32,
     loop_count: u32,
     output: String,
