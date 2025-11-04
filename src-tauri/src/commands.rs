@@ -251,7 +251,7 @@ pub async fn process_video_gif(
         .file_stem()
         .and_then(|stem| stem.to_str())
         .unwrap_or("output");
-    let output_filename = format!("{}_animation.gif", input_filename);
+    let output_filename = format!("{}.gif", input_filename);
     let output_file_path = output_path.join(output_filename);
 
     // 生成 ImageMagick 命令来创建GIF动画
