@@ -33,10 +33,18 @@ pub fn get_video_duration(path: &str) -> Result<f64, String> {
 
 // 执行命令
 pub fn execute_command(cmd: &str) -> Result<(), String> {
-    Command::new("sh")
+    let mut child = Command::new("sh")
         .arg("-c")
         .arg(cmd)
-        .status()
+        .spawn()
         .map_err(|e| e.to_string())?;
+    
+    // 等待子进程完成并回收资源
+    let status = child.wait().map_err(|e| e.to_string())?;
+    
+    if !status.success() {
+        return Err(format!("Command failed with exit code: {:?}", status.code()));
+    }
+    
     Ok(())
 }
