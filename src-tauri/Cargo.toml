@@ -1,6 +1,6 @@
 [package]
 name = "video-thumbnail-maker"
-version = "1.3.2"
+version = "1.3.3"
 description = "A simple and easy-to-use video thumbnail generator that quickly extracts multiple frames from videos and generates preview images."
 authors = ["yc-w-cn"]
 edition = "2021"
